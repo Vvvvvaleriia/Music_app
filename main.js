@@ -3,15 +3,16 @@ const btnSend = document.querySelector("button");
 
 const songs = localStorage.getItem("playlist");
 const songsJSON = JSON.parse(songs);
+console.log(songsJSON);
 for (const song of songsJSON){
-    const li = `<li>${song}</li>`
+    const li = `<li>${song} <button data-song="${song}">on</li>`
     songsList.insertAdjacentHTML("beforeend", li);
 }
 
 btnSend.onclick = function(){
     const input = document.querySelector("input");
     const textInput = input.value;
-    const li = `<li>${textInput} <button>on</button></li>`
+    const li = `<li>${textInput} <button data-song="${textInput}">on</button></li>`
     songsList.insertAdjacentHTML("beforeend", li);
     input.value = "";
     let playlist = localStorage.getItem("playlist");
@@ -23,21 +24,25 @@ btnSend.onclick = function(){
 
 songsList.onclick = function(event){
     if (event.target.tagName === "BUTTON"){
-        if (event.target.textContent === "on"){
-            event.target.textContent = "off";
-        } else {
-            const btns = document.querySelectorAll(".list-song button");
-            let onExists = false;
+        let clickedBtn = event.target;
 
-            for (const btn of btns){
-                if (btn.textContent === "on"){
-                    onExists = true;
-                    break;
-                }
+        if (clickedBtn.textContent === "on"){
+            let allButtons = songsList.querySelectorAll("BUTTON");
+            for (const btn of allButtons){
+                btn.textContent = "on";
             }
-            if (!onExists){
-                event.target.textContent = "on";
-            }
+            clickedBtn.textContent = "off";
+
+             if (!localStorage.getItem("historyListen")){
+            localStorage.setItem("historyListen", JSON.stringify([]));
+        }
+        const songName = clickedBtn.dataset.song;
+        let historyListen = JSON.parse(localStorage.getItem("historyListen"));
+        historyListen.push(songName);
+        localStorage.setItem("historyListen", JSON.stringify(historyListen));
+
+        } else {
+            clickedBtn.textContent = "on";
         }
     }
 }
