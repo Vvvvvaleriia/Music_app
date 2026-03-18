@@ -1,7 +1,7 @@
 const http = require("http");
 
-const clientId = "12304fbfa93a45008be04110a623ca46"
-const clientSecret = "78456bf94cac4917abcaf3c973b631e3"
+//clientId 
+// clientSecret 
 const redirectUrl = "http://127.0.0.1:5500/musicapp/"
 
 const server = http.createServer((req, resp) => {
