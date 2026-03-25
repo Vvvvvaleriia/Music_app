@@ -7,6 +7,16 @@ const toggleBtn = document.querySelector("#toggle-btn");
 const volumeUp = document.querySelector("#volume-up");
 const volumeDown = document.querySelector("#volume-down");
 const searchBtn = document.querySelector(".srch-btn");
+const inputSrch = document.querySelector(".name-inp");
+
+musicTest.hidden = true;
+inputSrch.hidden = true;
+searchBtn.hidden = true;
+trackName.hidden = true;
+trackArtist.hidden = true;
+toggleBtn.hidden = true;
+volumeUp.hidden = true;
+volumeDown.hidden = true;
 
 const clientId = "12304fbfa93a45008be04110a623ca46";
 const redirectUrl = "http://127.0.0.1:5501/index.html";
@@ -119,6 +129,10 @@ searchBtn.onclick = async () => {
 	trackName.innerText = track.name;
 	trackArtist.innerText = track.artists[0].name;
 
+	trackName.hidden = false;
+	trackArtist.hidden = false;
+	musicTest.hidden = false;
+
 	trackId = track.id;
 	console.log(trackId);
 };
@@ -136,6 +150,10 @@ musicTest.onclick = async () => {
 			uris: [uri],
 		}),
 	});
+
+	toggleBtn.hidden = false;
+	volumeUp.hidden = false;
+	volumeDown.hidden = false;
 };
 
 // START APP
@@ -145,6 +163,9 @@ async function startApp() {
 	if (!code) return;
 
 	await authorize(code);
+	btnLogin.hidden = true;
+	inputSrch.hidden = false;
+	searchBtn.hidden = false;
 	await initSpotifyPlayer();
 }
 startApp();
