@@ -3,20 +3,30 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="main.css" />
 		<title>Document</title>
 	</head>
 	<body>
-		<button id="login" class="btnToLogin">login</button>
-		<button id="test-music" class="btnToListen">listen music</button>
-		<input type="text" placeholder="Enter a song" class="name-inp" />
-		<button class="srch-btn">Search</button>
-		<div id="track-info">
-			<p id="track-name" class="songNameInfo">Song name</p>
-			<p id="track-artist" class="songArtistInfo">Song artist</p>
+		<div class="search">
+			<button id="login" class="btnToLogin">login</button>
+			<button id="test-music" class="btnToListen">listen music</button>
+			<input type="text" placeholder="Enter a song" class="name-inp" />
+			<button class="srch-btn">Search</button>
 		</div>
-		<button id="toggle-btn" class="btnToPlay">Play</button>
-		<button id="volume-up" class="btnUp">+</button>
-		<button id="volume-down" class="btnDown">-</button>
+		<div class="block">
+			<div class="track-info">
+				<p id="track-name" class="songNameInfo">Song name</p>
+				<p id="track-artist" class="songArtistInfo">Song artist</p>
+			</div>
+			<div class="play">
+				<button id="toggle-btn" class="btnToPlay">Play</button>
+			</div>
+			<div class="control">
+				<p id="volume-persent" class="vlm">Volume</p>
+				<button id="volume-up" class="btnUp">+</button>
+				<button id="volume-down" class="btnDown">-</button>
+			</div>
+		</div>
 		<script src="https://sdk.scdn.co/spotify-player.js"></script>
 		<script src="main.js"></script>
 	</body>

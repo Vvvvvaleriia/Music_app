@@ -8,6 +8,7 @@ const volumeUp = document.querySelector("#volume-up");
 const volumeDown = document.querySelector("#volume-down");
 const searchBtn = document.querySelector(".srch-btn");
 const inputSrch = document.querySelector(".name-inp");
+const volumePrs = document.querySelector("#volume-persent");
 
 musicTest.hidden = true;
 inputSrch.hidden = true;
@@ -17,6 +18,7 @@ trackArtist.hidden = true;
 toggleBtn.hidden = true;
 volumeUp.hidden = true;
 volumeDown.hidden = true;
+volumePrs.hidden = true;
 
 const clientId = "12304fbfa93a45008be04110a623ca46";
 const redirectUrl = "http://127.0.0.1:5501/index.html";
@@ -89,9 +91,12 @@ async function initSpotifyPlayer() {
 		},
 	);
 
-	player.addListener("ready", ({ device_id }) => {
+	player.addListener("ready", async ({ device_id }) => {
 		console.log("Ready with Device ID", device_id);
 		deviceId = device_id;
+
+		const state = await player.getVolume(); //не працює
+		volumePrs.innerText = `Volume: ${Math.round(state * 100)}%`;
 	});
 
 	player.connect();
@@ -104,13 +109,19 @@ async function initSpotifyPlayer() {
 
 	volumeUp.onclick = () => {
 		player.getVolume().then((volume) => {
-			player.setVolume(Math.min(volume + 0.1, 1));
+			let newVolume = Math.min(volume + 0.1, 1);
+			player.setVolume(newVolume).then(() => {
+				volumePrs.innerText = `Volume: ${Math.round(newVolume * 100)}%`;
+			});
 		});
 	};
 
 	volumeDown.onclick = () => {
 		player.getVolume().then((volume) => {
-			player.setVolume(Math.max(volume - 0.1, 0));
+			let newVolume = Math.max(volume - 0.1, 0);
+			player.setVolume(newVolume).then(() => {
+				volumePrs.innerText = `Volume: ${Math.round(newVolume * 100)}%`;
+			});
 		});
 	};
 }
@@ -129,8 +140,6 @@ searchBtn.onclick = async () => {
 	trackName.innerText = track.name;
 	trackArtist.innerText = track.artists[0].name;
 
-	trackName.hidden = false;
-	trackArtist.hidden = false;
 	musicTest.hidden = false;
 
 	trackId = track.id;
@@ -151,9 +160,12 @@ musicTest.onclick = async () => {
 		}),
 	});
 
+	trackName.hidden = false;
+	trackArtist.hidden = false;
 	toggleBtn.hidden = false;
 	volumeUp.hidden = false;
 	volumeDown.hidden = false;
+	volumePrs.hidden = false;
 };
 
 // START APP
