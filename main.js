@@ -2,13 +2,14 @@ const btnLogin = document.querySelector("#login");
 const musicTest = document.querySelector("#test-music");
 const trackName = document.querySelector("#track-name");
 const trackArtist = document.querySelector("#track-artist");
-const trackInfo = document.querySelector("#track-info");
 const toggleBtn = document.querySelector("#toggle-btn");
 const volumeUp = document.querySelector("#volume-up");
 const volumeDown = document.querySelector("#volume-down");
 const searchBtn = document.querySelector(".srch-btn");
 const inputSrch = document.querySelector(".name-inp");
 const volumePrs = document.querySelector("#volume-persent");
+const trackImg = document.querySelector("#imgInfo");
+const songsList = document.querySelector(".list-song");
 
 musicTest.hidden = true;
 inputSrch.hidden = true;
@@ -19,6 +20,7 @@ toggleBtn.hidden = true;
 volumeUp.hidden = true;
 volumeDown.hidden = true;
 volumePrs.hidden = true;
+trackImg.hidden = true;
 
 const clientId = "12304fbfa93a45008be04110a623ca46";
 const redirectUrl = "http://127.0.0.1:5501/index.html";
@@ -136,17 +138,27 @@ searchBtn.onclick = async () => {
 	const textInput = input.value;
 
 	const result = await searchForItem(token, textInput, "track");
+
+	const li = `<li>${textInput} <button data-song="${textInput}">listen music</button></li>`;
+	songsList.insertAdjacentHTML("beforeend", li);
+	input.value = "";
+
 	const track = result.tracks.items[0];
 	trackName.innerText = track.name;
 	trackArtist.innerText = track.artists[0].name;
+	const imgUrl = track.album.images[0].url;
+	const img = `<img src="${imgUrl}">`;
+	trackImg.insertAdjacentHTML("afterbegin", img);
 
 	musicTest.hidden = false;
+	trackImg.hidden = true; //не працює
 
 	trackId = track.id;
 	console.log(trackId);
 };
 
 musicTest.onclick = async () => {
+	let allButtons = songsList.querySelectorAll("BUTTON");
 	const uri = await getTrack();
 
 	fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
@@ -166,6 +178,7 @@ musicTest.onclick = async () => {
 	volumeUp.hidden = false;
 	volumeDown.hidden = false;
 	volumePrs.hidden = false;
+	trackImg.hidden = false;
 };
 
 // START APP

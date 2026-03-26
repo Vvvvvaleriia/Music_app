@@ -20,7 +20,6 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-
 	padding: 0 40px;
 }
 
@@ -45,4 +44,28 @@
 .control {
 	display: flex;
 	gap: 5px;
+}
+
+#imgInfo {
+	width: 64px;
+	height: 64px;
+	border: 1px solid #282b4a;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+	flex-shrink: 0;
+}
+
+#imgInfo img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.track-general {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	min-width: 0;
 }
