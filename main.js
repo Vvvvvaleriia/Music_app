@@ -1,5 +1,4 @@
 const btnLogin = document.querySelector("#login");
-const musicTest = document.querySelector("#test-music");
 const trackName = document.querySelector("#track-name");
 const trackArtist = document.querySelector("#track-artist");
 const toggleBtn = document.querySelector("#toggle-btn");
@@ -10,8 +9,8 @@ const inputSrch = document.querySelector(".name-inp");
 const volumePrs = document.querySelector("#volume-persent");
 const trackImg = document.querySelector("#imgInfo");
 const songsList = document.querySelector(".list-song");
+const savedSongs = document.querySelector(".list-saved");
 
-musicTest.hidden = true;
 inputSrch.hidden = true;
 searchBtn.hidden = true;
 trackName.hidden = true;
@@ -130,7 +129,7 @@ async function initSpotifyPlayer() {
 
 //EVENTS
 btnLogin.onclick = () => {
-	window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&scope=streaming user-read-email user-read-private user-modify-playback-state&redirect_uri=${encodeURIComponent(redirectUrl)}`;
+	window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&scope=streaming user-read-email user-read-private user-modify-playback-state user-library-modify user-follow-modify playlist-modify-public&redirect_uri=${encodeURIComponent(redirectUrl)}`;
 };
 
 searchBtn.onclick = async () => {
@@ -139,46 +138,84 @@ searchBtn.onclick = async () => {
 
 	const result = await searchForItem(token, textInput, "track");
 
-	const li = `<li>${textInput} <button data-song="${textInput}">listen music</button></li>`;
-	songsList.insertAdjacentHTML("beforeend", li);
-	input.value = "";
-
 	const track = result.tracks.items[0];
-	trackName.innerText = track.name;
-	trackArtist.innerText = track.artists[0].name;
-	const imgUrl = track.album.images[0].url;
-	const img = `<img src="${imgUrl}">`;
-	trackImg.insertAdjacentHTML("afterbegin", img);
-
-	musicTest.hidden = false;
-	trackImg.hidden = true; //не працює
+	const li = document.createElement("li");
+	li.innerHTML = `${track.name} - ${track.artists[0].name} <button class="play-btn">listen music</button> <button class="save-btn">save</button>`;
+	const btnPlay = li.querySelector(".play-btn");
+	const btnSave = li.querySelector(".save-btn");
+	input.value = "";
 
 	trackId = track.id;
 	console.log(trackId);
-};
 
-musicTest.onclick = async () => {
-	let allButtons = songsList.querySelectorAll("BUTTON");
-	const uri = await getTrack();
+	btnPlay.onclick = async () => {
+		const uri = track.uri;
 
-	fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-		headers: {
-			Authorization: `Bearer ${token}`,
-			"Content-Type": "application/json",
-		},
-		method: "PUT",
-		body: JSON.stringify({
-			uris: [uri],
-		}),
-	});
+		await fetch(
+			`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
+				method: "PUT",
+				body: JSON.stringify({
+					uris: [uri],
+				}),
+			},
+		);
 
-	trackName.hidden = false;
-	trackArtist.hidden = false;
-	toggleBtn.hidden = false;
-	volumeUp.hidden = false;
-	volumeDown.hidden = false;
-	volumePrs.hidden = false;
-	trackImg.hidden = false;
+		trackName.hidden = false;
+		trackArtist.hidden = false;
+		toggleBtn.hidden = false;
+		volumeUp.hidden = false;
+		volumeDown.hidden = false;
+		volumePrs.hidden = false;
+		trackImg.hidden = false;
+
+		trackName.innerText = track.name;
+		trackArtist.innerHTML = track.artists[0].name;
+
+		const imgUrl = track.album.images[0].url;
+		trackImg.innerHTML = `<img src="${imgUrl}">`;
+	};
+
+	btnSave.onclick = async () => {
+		const uris = `spotify:track:${track.id}`;
+		await fetch(
+			`https://api.spotify.com/v1/me/library?uris=${encodeURIComponent(uris)}`,
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
+				method: "PUT",
+			},
+		);
+
+		const liSaved = document.createElement("li");
+		liSaved.innerText = `${track.name} - ${track.artists[0].name}`;
+		const trackData = {
+			name: track.name,
+			artist: track.artists[0].name,
+		};
+		const songs = localStorage.getItem("listOfSaved");
+		const songsJson = JSON.parse(songs);
+		for (const track of songsJson) {
+			const li = `<li>${track.name} - ${track.artist}</li>`;
+			savedSongs.insertAdjacentHTML("beforeend", li);
+		}
+
+		let listOfSaved = localStorage.getItem("listOfSaved");
+		listOfSaved = JSON.parse(listOfSaved);
+		listOfSaved.push(trackData);
+		const jsonlistOfSaved = JSON.stringify(listOfSaved);
+		localStorage.setItem("listOfSaved", jsonlistOfSaved);
+
+		savedSongs.appendChild(liSaved);
+	};
+
+	songsList.appendChild(li);
 };
 
 // START APP

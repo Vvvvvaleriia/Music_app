@@ -6,7 +6,7 @@
 
 .search {
 	margin-top: 10px;
-	margin-left: 10px;
+	margin-left: 20px;
 }
 
 .block {
@@ -68,4 +68,10 @@
 	align-items: center;
 	gap: 15px;
 	min-width: 0;
+}
+
+.saved {
+	position: fixed;
+	bottom: 250px;
+	margin-left: 20px;
 }
