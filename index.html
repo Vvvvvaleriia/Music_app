@@ -9,29 +9,48 @@
 	<body>
 		<div class="search">
 			<button id="login" class="btnToLogin">login</button>
-			<input type="text" placeholder="Enter a song" class="name-inp" />
-			<button class="srch-btn">Search</button>
+			<input
+				type="text"
+				placeholder="Enter a song"
+				class="name-inp"
+				hidden
+			/>
+			<button class="srch-btn" hidden>Search</button>
 			<ol class="list-song"></ol>
 		</div>
 		<div class="saved">
-			<p id="save-track">Saved tracks</p>
+			<p id="save-track" class="save-track" hidden>Saved tracks</p>
 			<ol class="list-saved"></ol>
 		</div>
 		<div class="block">
 			<div class="track-general">
 				<div id="imgInfo" class="img-container"></div>
 				<div class="track-info">
-					<p id="track-name" class="songNameInfo">Song name</p>
-					<p id="track-artist" class="songArtistInfo">Song artist</p>
+					<p id="track-name" class="songNameInfo" hidden>Song name</p>
+					<p id="track-artist" class="songArtistInfo" hidden>
+						Song artist
+					</p>
 				</div>
 			</div>
 			<div class="play">
-				<button id="toggle-btn" class="btnToPlay">Play</button>
+				<button id="toggle-btn" class="btnToPlay" hidden>Play</button>
+				<input
+					type="number"
+					id="time-input"
+					class="time-input"
+					placeholder="seconds"
+					hidden
+				/>
+				<button id="set-time" class="set-time" hidden>Set time</button>
+				<div class="time">
+					<p id="current-time" class="current-time" hidden>00:00</p>
+					<p id="duration" class="duration" hidden>00:00</p>
+				</div>
 			</div>
 			<div class="control">
-				<p id="volume-persent" class="vlm">Volume</p>
-				<button id="volume-up" class="btnUp">+</button>
-				<button id="volume-down" class="btnDown">-</button>
+				<p id="volume-persent" class="vlm" hidden>Volume</p>
+				<button id="volume-up" class="btnUp" hidden>+</button>
+				<button id="volume-down" class="btnDown" hidden>-</button>
 			</div>
 		</div>
 		<script src="https://sdk.scdn.co/spotify-player.js"></script>

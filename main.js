@@ -10,15 +10,12 @@ const volumePrs = document.querySelector("#volume-persent");
 const trackImg = document.querySelector("#imgInfo");
 const songsList = document.querySelector(".list-song");
 const savedSongs = document.querySelector(".list-saved");
+const savedTracks = document.querySelector(".save-track");
+const currentTime = document.querySelector("#current-time");
+const durationTime = document.querySelector("#duration");
+const input = document.querySelector("#time-input");
+const btn = document.querySelector("#set-time");
 
-inputSrch.hidden = true;
-searchBtn.hidden = true;
-trackName.hidden = true;
-trackArtist.hidden = true;
-toggleBtn.hidden = true;
-volumeUp.hidden = true;
-volumeDown.hidden = true;
-volumePrs.hidden = true;
 trackImg.hidden = true;
 
 const clientId = "12304fbfa93a45008be04110a623ca46";
@@ -26,8 +23,11 @@ const redirectUrl = "http://127.0.0.1:5501/index.html";
 
 let token;
 let deviceId;
-let player;
 let trackId;
+let idInterval = null;
+let current = 0;
+let durationTimeValue = 0;
+let isActive = false;
 
 window.onSpotifyWebPlaybackSDKReady = () => {};
 
@@ -42,13 +42,21 @@ async function authorize(code) {
 	});
 
 	const data = await response.json();
-	token = data.token;
+	return data.token;
+}
+
+function formatTime(ms) {
+	const totalSeconds = Math.floor(ms / 1000);
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = totalSeconds % 60;
+
+	return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
 //SEARCH
-async function searchForItem(token, textInput, type) {
+async function searchForType(query, type) {
 	const resp = await fetch(
-		`https://api.spotify.com/v1/search?q=${textInput}&type=${type}`,
+		`https://api.spotify.com/v1/search?q=${query}&type=${type}`,
 		{
 			headers: {
 				Authorization: `Bearer ${token}`,
@@ -57,12 +65,12 @@ async function searchForItem(token, textInput, type) {
 		},
 	);
 
-	const json = await resp.json();
-	return json;
+	const data = await resp.json();
+	return data;
 }
 
 //GET TRACK
-async function getTrack() {
+async function getTrackURI() {
 	const resp = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
 		headers: {
 			Authorization: `Bearer ${token}`,
@@ -70,14 +78,14 @@ async function getTrack() {
 		method: "GET",
 	});
 
-	const json = await resp.json();
-	return json.uri;
+	const data = await resp.json();
+	return data.uri;
 }
 
 //INIT PLAYER
 async function initSpotifyPlayer() {
-	player = new Spotify.Player({
-		name: "Web Playback SDK Quick Start Player",
+	const player = new Spotify.Player({
+		name: "Start Player",
 		getOAuthToken: (cb) => {
 			cb(token);
 		},
@@ -96,8 +104,68 @@ async function initSpotifyPlayer() {
 		console.log("Ready with Device ID", device_id);
 		deviceId = device_id;
 
-		const state = await player.getVolume(); //не працює
+		const state = await player.getVolume();
 		volumePrs.innerText = `Volume: ${Math.round(state * 100)}%`;
+	});
+
+	player.addListener("player_state_changed", (state) => {
+		const {
+			position,
+			duration,
+			track_window: { current_track },
+			paused,
+		} = state;
+
+		current = position;
+		durationTimeValue = duration;
+
+		if (!isActive && !state.paused) {
+			isActive = true;
+			idInterval = setInterval(() => {
+				current += 1000;
+				currentTime.textContent = formatTime(current);
+			}, 1000);
+		} else if (isActive && state.paused) {
+			clearInterval(idInterval);
+			isActive = false;
+		}
+
+		if (state.paused && state.position === 0) {
+			clearInterval(idInterval);
+			isActive = false;
+			current = 0;
+			currentTime.textContent = formatTime(current);
+			return;
+		}
+
+		durationTime.textContent = formatTime(duration);
+
+		console.log("Currently Playing", current_track);
+		console.log("Position in Song", position);
+		console.log("Duration of Song", duration);
+	});
+
+	player.addListener("player_state_changed", (state) => {
+		const isPaused = state.paused;
+
+		if (isPaused) {
+			toggleBtn.textContent = "play";
+		} else {
+			toggleBtn.textContent = "pause";
+		}
+
+		if (state.position === 0 && state.paused) {
+			toggleBtn.textContent = "play";
+		}
+	});
+
+	btn.addEventListener("click", () => {
+		const seconds = Number(input.value);
+		const ms = seconds * 1000;
+		player.seek(ms).then(() => {
+			console.log("Position changed");
+		});
+		setTrackTime(seconds);
 	});
 
 	player.connect();
@@ -127,96 +195,80 @@ async function initSpotifyPlayer() {
 	};
 }
 
-//EVENTS
-btnLogin.onclick = () => {
-	window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&scope=streaming user-read-email user-read-private user-modify-playback-state user-library-modify user-follow-modify playlist-modify-public&redirect_uri=${encodeURIComponent(redirectUrl)}`;
-};
-
-searchBtn.onclick = async () => {
-	const input = document.querySelector(".name-inp");
-	const textInput = input.value;
-
-	const result = await searchForItem(token, textInput, "track");
-
-	const track = result.tracks.items[0];
+function createTrackElement(track) {
 	const li = document.createElement("li");
-	li.innerHTML = `${track.name} - ${track.artists[0].name} <button class="play-btn">listen music</button> <button class="save-btn">save</button>`;
+
+	li.innerHTML = `
+		${track.name} - ${track.artists[0].name}
+		<button class="play-btn">listen music</button>
+		<button class="save-btn">save</button>
+	`;
+
 	const btnPlay = li.querySelector(".play-btn");
 	const btnSave = li.querySelector(".save-btn");
-	input.value = "";
 
-	trackId = track.id;
-	console.log(trackId);
+	btnPlay.onclick = () => playTrack(track);
+	btnSave.onclick = () => saveTrack(track);
 
-	btnPlay.onclick = async () => {
-		const uri = track.uri;
+	return li;
+}
 
-		await fetch(
-			`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
-			{
-				headers: {
-					Authorization: `Bearer ${token}`,
-					"Content-Type": "application/json",
-				},
-				method: "PUT",
-				body: JSON.stringify({
-					uris: [uri],
-				}),
+async function playTrack(track) {
+	const uri = track.uri;
+
+	await fetch(
+		`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
 			},
-		);
+			method: "PUT",
+			body: JSON.stringify({
+				uris: [uri],
+			}),
+		},
+	);
 
-		trackName.hidden = false;
-		trackArtist.hidden = false;
-		toggleBtn.hidden = false;
-		volumeUp.hidden = false;
-		volumeDown.hidden = false;
-		volumePrs.hidden = false;
-		trackImg.hidden = false;
+	trackName.hidden = false;
+	trackArtist.hidden = false;
+	toggleBtn.hidden = false;
+	volumeUp.hidden = false;
+	volumeDown.hidden = false;
+	volumePrs.hidden = false;
+	trackImg.hidden = false;
+	currentTime.hidden = false;
+	durationTime.hidden = false;
+	input.hidden = false;
+	btn.hidden = false;
 
-		trackName.innerText = track.name;
-		trackArtist.innerHTML = track.artists[0].name;
+	toggleBtn.textContent = "pause";
 
-		const imgUrl = track.album.images[0].url;
-		trackImg.innerHTML = `<img src="${imgUrl}">`;
-	};
+	trackName.innerText = track.name;
+	trackArtist.innerHTML = track.artists[0].name;
 
-	btnSave.onclick = async () => {
-		const uris = `spotify:track:${track.id}`;
-		await fetch(
-			`https://api.spotify.com/v1/me/library?uris=${encodeURIComponent(uris)}`,
-			{
-				headers: {
-					Authorization: `Bearer ${token}`,
-					"Content-Type": "application/json",
-				},
-				method: "PUT",
+	const imgUrl = track.album.images[0].url;
+	trackImg.innerHTML = `<img src="${imgUrl}">`;
+}
+
+async function saveTrack(track) {
+	const uris = `spotify:track:${track.id}`;
+	await fetch(
+		`https://api.spotify.com/v1/me/library?uris=${encodeURIComponent(uris)}`,
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
 			},
-		);
+			method: "PUT",
+		},
+	);
 
-		const liSaved = document.createElement("li");
-		liSaved.innerText = `${track.name} - ${track.artists[0].name}`;
-		const trackData = {
-			name: track.name,
-			artist: track.artists[0].name,
-		};
-		const songs = localStorage.getItem("listOfSaved");
-		const songsJson = JSON.parse(songs);
-		for (const track of songsJson) {
-			const li = `<li>${track.name} - ${track.artist}</li>`;
-			savedSongs.insertAdjacentHTML("beforeend", li);
-		}
+	const liSaved = document.createElement("li");
+	liSaved.innerText = `${track.name} - ${track.artists[0].name}`;
 
-		let listOfSaved = localStorage.getItem("listOfSaved");
-		listOfSaved = JSON.parse(listOfSaved);
-		listOfSaved.push(trackData);
-		const jsonlistOfSaved = JSON.stringify(listOfSaved);
-		localStorage.setItem("listOfSaved", jsonlistOfSaved);
-
-		savedSongs.appendChild(liSaved);
-	};
-
-	songsList.appendChild(li);
-};
+	savedSongs.appendChild(liSaved);
+}
 
 // START APP
 async function startApp() {
@@ -224,10 +276,28 @@ async function startApp() {
 
 	if (!code) return;
 
-	await authorize(code);
+	token = await authorize(code);
 	btnLogin.hidden = true;
 	inputSrch.hidden = false;
 	searchBtn.hidden = false;
+	savedTracks.hidden = false;
 	await initSpotifyPlayer();
 }
+
+//EVENTS
+btnLogin.onclick = () => {
+	window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&scope=streaming user-read-email user-read-private user-modify-playback-state user-library-modify user-follow-modify playlist-modify-public&redirect_uri=${encodeURIComponent(redirectUrl)}`;
+};
+
+searchBtn.onclick = async () => {
+	const textInput = inputSrch.value;
+
+	const result = await searchForType(textInput, "track");
+	const track = result.tracks.items[0];
+
+	const li = createTrackElement(track);
+	inputSrch.value = "";
+	songsList.appendChild(li);
+};
+
 startApp();

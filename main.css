@@ -75,3 +75,8 @@
 	bottom: 250px;
 	margin-left: 20px;
 }
+
+.time {
+	display: flex;
+	gap: 15px;
+}
