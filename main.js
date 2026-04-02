@@ -281,12 +281,14 @@ async function startApp() {
 	inputSrch.hidden = false;
 	searchBtn.hidden = false;
 	savedTracks.hidden = false;
+
 	await initSpotifyPlayer();
+	await render();
 }
 
 //EVENTS
 btnLogin.onclick = () => {
-	window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&scope=streaming user-read-email user-read-private user-modify-playback-state user-library-modify user-follow-modify playlist-modify-public&redirect_uri=${encodeURIComponent(redirectUrl)}`;
+	window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&scope=streaming user-read-email user-read-private user-modify-playback-state user-library-modify user-follow-modify playlist-modify-public user-library-read&redirect_uri=${encodeURIComponent(redirectUrl)}`;
 };
 
 searchBtn.onclick = async () => {
@@ -299,5 +301,70 @@ searchBtn.onclick = async () => {
 	inputSrch.value = "";
 	songsList.appendChild(li);
 };
+
+//RENDER
+async function loadSavedTracks() {
+	const resp = await fetch(`https://api.spotify.com/v1/me/tracks`, {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+		method: "GET",
+	});
+
+	const savedSngs = await resp.json();
+	return savedSngs.items;
+}
+
+async function* streamArray(array) {
+	for (const item of array) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		yield item;
+	}
+}
+
+async function* asyncMap(iterator, asyncFn) {
+	for await (const track of iterator) {
+		const result = await asyncFn(track);
+		yield result;
+	}
+}
+
+function memoize(fn) {
+	const cache = new Map();
+	return function (...args) {
+		const key = JSON.stringify(args);
+		if (cache.has(key)) {
+			return cache.get(key);
+		}
+
+		const res = fn(...args);
+		cache.set(key, res);
+		return res;
+	};
+}
+
+const renderTracks = memoize((item) => {
+	return `<p>${item.track.name} - ${item.track.artists[0].name}</p>`;
+});
+
+async function incrementalRender(container, iterator) {
+	for await (const html of iterator) {
+		container.insertAdjacentHTML("beforeend", html);
+	}
+}
+
+async function render() {
+	const tracksDiv = document.querySelector(".tracks");
+
+	const tracks = await loadSavedTracks();
+
+	if (tracks) {
+		const streamTracks = streamArray(tracks);
+		const mappedTracks = asyncMap(streamTracks, async (item) =>
+			renderTracks(item),
+		);
+		await incrementalRender(tracksDiv, mappedTracks);
+	}
+}
 
 startApp();

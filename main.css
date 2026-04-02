@@ -70,9 +70,9 @@
 	min-width: 0;
 }
 
-.saved {
+.tracks {
 	position: fixed;
-	bottom: 250px;
+	bottom: 150px;
 	margin-left: 20px;
 }
 
