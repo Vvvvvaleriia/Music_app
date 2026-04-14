@@ -19,7 +19,7 @@
 			<ol class="list-song"></ol>
 		</div>
 		<div class="tracks">
-			<p id="save-track" class="save-track" hidden>Saved tracks</p>
+			<div id="save-track" class="save-track" hidden>Saved tracks</div>
 		</div>
 		<div class="block" hidden>
 			<div class="track-general">
@@ -52,7 +52,7 @@
 				<button id="volume-down" class="btnDown" hidden>-</button>
 			</div>
 		</div>
-		<script src="https://sdk.scdn.co/spotify-player.js"></script>
-		<script src="main.js"></script>
+		<script src="https://sdk.scdn.co/spotify-player.js" defer></script>
+		<script type="module" src="src/js/main.js" defer></script>
 	</body>
 </html>

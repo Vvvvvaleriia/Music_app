@@ -19,7 +19,7 @@ const btn = document.querySelector("#set-time");
 trackImg.hidden = true;
 
 const clientId = "12304fbfa93a45008be04110a623ca46";
-const redirectUrl = "http://127.0.0.1:5501/index.html";
+const redirectUrl = "http://127.0.0.1:3000/";
 
 let token;
 let deviceId;
@@ -33,7 +33,7 @@ window.onSpotifyWebPlaybackSDKReady = () => {};
 
 //AUTHORIZE
 async function authorize(code) {
-	const response = await fetch("http://127.0.0.1:3000/api/access", {
+	const response = await fetch("http://127.0.0.1:5000/api/access", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",

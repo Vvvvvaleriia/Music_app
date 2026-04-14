@@ -3,7 +3,7 @@ require("dotenv").config();
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const redirectUrl = "http://127.0.0.1:5501/index.html";
+const redirectUrl = "http://127.0.0.1:3000";
 
 const server = http.createServer((req, resp) => {
 	resp.setHeader("Access-Control-Allow-Origin", "*");
@@ -51,7 +51,10 @@ const server = http.createServer((req, resp) => {
 						resp.writeHead(200, {
 							"Content-Type": "application/json",
 						});
-						resp.end(JSON.stringify({ token: data.access_token }));
+						console.log(data);
+						return resp.end(
+							JSON.stringify({ token: data.access_token }),
+						);
 					});
 			});
 			return;
@@ -61,6 +64,6 @@ const server = http.createServer((req, resp) => {
 	resp.end("Not Found");
 });
 
-server.listen(3000, () => {
-	console.log("Server Start on 3000 PORT");
+server.listen(5000, () => {
+	console.log("Server Start on 5000 PORT");
 });
