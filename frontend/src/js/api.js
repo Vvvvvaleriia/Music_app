@@ -1,4 +1,4 @@
-import { savedSongs } from "./dom.js";
+import { savedTracks } from "./dom.js";
 import { states } from "./state.js";
 
 export async function authorize(code) {
@@ -12,6 +12,7 @@ export async function authorize(code) {
 
 	const data = await response.json();
 	console.log(data);
+	localStorage.setItem("token", data.token);
 	return data.token;
 }
 
@@ -30,22 +31,6 @@ export async function searchForType(query, type) {
 	return data;
 }
 
-export async function getTrackURI() {
-	// не потрібна?
-	const resp = await fetch(
-		`https://api.spotify.com/v1/tracks/${states.trackId}`,
-		{
-			headers: {
-				Authorization: `Bearer ${states.token}`,
-			},
-			method: "GET",
-		},
-	);
-
-	const data = await resp.json();
-	return data.uri;
-}
-
 export async function saveTrack(track) {
 	const uris = `spotify:track:${track.id}`;
 	await fetch(
@@ -59,9 +44,21 @@ export async function saveTrack(track) {
 		},
 	);
 
-	const liSaved = document.createElement("li");
-	liSaved.innerText = `${track.name} - ${track.artists[0].name}`;
+	// const liSaved = document.createElement("li");
+	// liSaved.innerText = `${track.name} - ${track.artists[0].name}`;
 
-	console.log(savedSongs);
-	savedSongs.appendChild(liSaved);
+	// savedTracks.appendChild(liSaved);
+}
+
+export async function deleteSaved(track) {
+	const uris = `spotify:track:${track.id}`;
+	await fetch(
+		`https://api.spotify.com/v1/me/library?uris=${encodeURIComponent(uris)}`,
+		{
+			headers: {
+				Authorization: `Bearer ${states.token}`,
+			},
+			method: "DELETE",
+		},
+	);
 }

@@ -7,16 +7,29 @@
 		<title>Document</title>
 	</head>
 	<body>
-		<div class="search">
+		<div class="login-page">
 			<button id="login" class="btnToLogin">login</button>
-			<input
-				type="text"
-				placeholder="Enter a song"
-				class="name-inp"
-				hidden
-			/>
-			<button class="srch-btn" hidden>Search</button>
-			<ol class="list-song"></ol>
+		</div>
+		<div class="header-control">
+			<div class="search">
+				<input
+					type="text"
+					placeholder="Enter a song"
+					class="name-inp"
+					hidden
+				/>
+				<button class="srch-btn" hidden>Search</button>
+				<ol class="list-song"></ol>
+			</div>
+			<div class="history-container">
+				<input
+					type="text"
+					placeholder="Enter date"
+					class="search-date"
+					hidden
+				/>
+				<button class="btn-seachDate" hidden>Search</button>
+			</div>
 		</div>
 		<div class="tracks">
 			<div id="save-track" class="save-track" hidden>Saved tracks</div>

@@ -15,7 +15,7 @@ import {
 import { states } from "./state.js";
 import { formatTime } from "./utils.js";
 
-window.onSpotifyWebPlaybackSDKReady = () => {};
+//window.onSpotifyWebPlaybackSDKReady = () => {};
 
 export async function playTrack(track) {
 	const uri = track.uri;
@@ -112,10 +112,6 @@ export async function initSpotifyPlayer() {
 		}
 
 		durationTime.textContent = formatTime(duration);
-
-		console.log("Currently Playing", current_track);
-		console.log("Position in Song", position);
-		console.log("Duration of Song", duration);
 	});
 
 	player.addListener("player_state_changed", (state) => {
