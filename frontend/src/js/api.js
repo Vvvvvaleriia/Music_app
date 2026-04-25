@@ -12,9 +12,19 @@ export async function authorize(code) {
 
 	const data = await response.json();
 	console.log(data);
-	localStorage.setItem("token", data.token);
+	//localStorage.setItem("token", data.token);
 	return data.token;
 }
+
+//export async function isTokenValid(token) {
+//	const res = await fetch(`https://api.spotify.com/v1/me`, {
+//		headers: {
+//			Autorization: `Bearer ${token}`,
+//		},
+//	});
+//
+//	return res.status;
+//}
 
 export async function searchForType(query, type) {
 	const resp = await fetch(
@@ -43,7 +53,6 @@ export async function saveTrack(track) {
 			method: "PUT",
 		},
 	);
-
 	// const liSaved = document.createElement("li");
 	// liSaved.innerText = `${track.name} - ${track.artists[0].name}`;
 

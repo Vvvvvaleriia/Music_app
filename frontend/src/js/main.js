@@ -1,12 +1,12 @@
 import {
 	btnLogin,
+	welcomeText,
 	searchBtn,
 	inputSrch,
 	songsList,
 	savedTracks,
 	searchDate,
 	btnSearchListened,
-	loginBlock,
 } from "./dom.js";
 import { clientId, redirectUrl } from "./config.js";
 import { states } from "./state.js";
@@ -16,11 +16,9 @@ import { createTrackElement, render } from "./render.js";
 import { renderHistory } from "./history.js";
 import { events } from "./emitter.js";
 
-events.on("savedTrack", saveTrack);
-events.on("savedTrack", render);
-
-events.on("deleteTrack", deleteSaved);
-events.on("historyOfListened", renderHistory);
+events.on("savedTrack", saveTrack, render);
+events.on("deleteTrack", deleteSaved, render);
+//events.on("historyOfListened", renderHistory);
 
 window.onSpotifyWebPlaybackSDKReady = () => {
 	initSpotifyPlayer();
@@ -49,39 +47,50 @@ btnSearchListened.onclick = function () {
 
 async function startApp() {
 	const code = window.location.search.replace("?code=", "");
-	const savedToken = localStorage.getItem("token");
+	//const savedToken = localStorage.getItem("token");
 
-	if (savedToken) {
-		states.token = savedToken;
+	//if (savedToken) {
+	//const valid = await isTokenValid(savedToken);
 
-		btnLogin.hidden = true;
-		inputSrch.hidden = false;
-		searchBtn.hidden = false;
-		savedTracks.hidden = false;
-		searchDate.hidden = false;
-		btnSearchListened.hidden = false;
+	//if (valid) {
+	//	states.token = savedToken;
 
-		//await initSpotifyPlayer();
-		await render();
-		return;
-	}
+	//	btnLogin.hidden = true;
+	//	inputSrch.hidden = false;
+	//	searchBtn.hidden = false;
+	//	savedTracks.hidden = false;
+	//	searchDate.hidden = false;
+	//	btnSearchListened.hidden = false;
 
-	if (code) {
-		states.token = await authorize(code);
+	//await initSpotifyPlayer();
+	//	await render();
+	//	return;
+	//} else {
+	//	localStorage.removeItem("token");
+	//}
 
-		btnLogin.hidden = true;
-		inputSrch.hidden = false;
-		searchBtn.hidden = false;
-		savedTracks.hidden = false;
-		searchDate.hidden = false;
-		btnSearchListened.hidden = false;
+	if (!code) return;
+	//const newToken = await authorize(code);
 
-		//await initSpotifyPlayer();
-		await render();
-		return;
-	}
+	//localStorage.setItem("token", newToken);
+	//states.token = newToken;
+	states.token = await authorize(code);
 
-	btnLogin.hidden = false;
+	document.querySelector(".login-page")?.remove();
+	btnLogin.hidden = true;
+	welcomeText.hidden = true;
+	inputSrch.hidden = false;
+	searchBtn.hidden = false;
+	savedTracks.hidden = false;
+	searchDate.hidden = false;
+	btnSearchListened.hidden = false;
+
+	//await initSpotifyPlayer();
+	await render();
+	return;
+
+	//btnLogin.hidden = false;
+	//}
+	//}
 }
-
 startApp();

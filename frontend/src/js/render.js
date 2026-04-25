@@ -1,4 +1,3 @@
-import { saveTrack, deleteSaved } from "./api.js";
 import { playTrack } from "./player.js";
 import { states } from "./state.js";
 import { savePlayedTrack } from "./history.js";
@@ -22,6 +21,7 @@ export function createTrackElement(track) {
 	});
 	btnSave.onclick = function () {
 		events.emit("savedTrack", track);
+		states.saved.push(track);
 	};
 
 	return li;
@@ -39,18 +39,16 @@ async function loadSavedTracks() {
 	return savedSngs.items;
 }
 
-async function* streamArray(array) {
+export async function* streamArray(array) {
 	for (const item of array) {
 		await new Promise((resolve) => setTimeout(resolve, 10));
 		yield item;
-		console.log("stream", item);
 	}
 }
 
-async function* asyncMap(iterator, asyncFn) {
+export async function* asyncMap(iterator, asyncFn) {
 	for await (const track of iterator) {
 		const result = await asyncFn(track);
-		console.log("map input", track);
 		yield result;
 	}
 }
@@ -92,6 +90,10 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 
 			el.querySelector(".delete-saved").onclick = function () {
 				events.emit("deleteTrack", data.item.track);
+				states.saved = states.saved.filter(
+					(song) => song.track.id !== data.item.track.id,
+				);
+				el.remove();
 			};
 
 			batch.push(el);
@@ -99,7 +101,6 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 				yield batch;
 				batch = [];
 			}
-			console.log("batch add", data);
 		}
 
 		if (batch.length) {
@@ -108,18 +109,18 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 	};
 }
 
-async function incrementalRender(container, iterator) {
+export async function incrementalRender(container, iterator) {
 	for await (const batch of iterator) {
 		container.append(...batch);
 	}
 }
 
 export async function render() {
-	console.log("RENDER START");
 	const tracksDiv = document.querySelector(".tracks");
 
+	tracksDiv.innerHTML = "";
+
 	const tracks = await loadSavedTracks();
-	console.log("tracks", tracks);
 
 	if (tracks) {
 		const streamTracks = streamArray(tracks);

@@ -6,4 +6,5 @@ export const states = {
 	current: 0,
 	durationTimeValue: 0,
 	isActive: false,
+	saved: [],
 };
