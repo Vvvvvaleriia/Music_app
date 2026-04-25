@@ -84,8 +84,9 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 			el.innerHTML = data.html;
 
 			el.querySelector(".play-saved").addEventListener("click", () => {
-				playTrack(data.item.track);
-				savePlayedTrack(data.item.track);
+				events.emit("playSaved", data.item.track);
+				//playTrack(data.item.track);
+				//savePlayedTrack(data.item.track);
 			});
 
 			el.querySelector(".delete-saved").onclick = function () {
