@@ -1,7 +1,8 @@
-import { playTrack } from "./player.js";
+import { playTrack } from "./api.js";
 import { states } from "./state.js";
 import { savePlayedTrack } from "./history.js";
 import { events } from "./emitter.js";
+import { loadSavedTracks } from "./api.js";
 
 export function createTrackElement(track) {
 	const li = document.createElement("li");
@@ -16,27 +17,16 @@ export function createTrackElement(track) {
 	const btnSave = li.querySelector(".save-btn");
 
 	btnPlay.addEventListener("click", () => {
-		playTrack(track);
-		savePlayedTrack(track);
+		events.emit("playTrack", track);
+		//playTrack(track);
+		//savePlayedTrack(track);
 	});
 	btnSave.onclick = function () {
-		events.emit("savedTrack", track);
 		states.saved.push(track);
+		events.emit("savedTrack", track);
 	};
 
 	return li;
-}
-
-async function loadSavedTracks() {
-	const resp = await fetch(`https://api.spotify.com/v1/me/tracks`, {
-		headers: {
-			Authorization: `Bearer ${states.token}`,
-		},
-		method: "GET",
-	});
-
-	const savedSngs = await resp.json();
-	return savedSngs.items;
 }
 
 export async function* streamArray(array) {
@@ -84,17 +74,17 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 			el.innerHTML = data.html;
 
 			el.querySelector(".play-saved").addEventListener("click", () => {
-				events.emit("playSaved", data.item.track);
+				events.emit("playTrack", data.item.track);
 				//playTrack(data.item.track);
 				//savePlayedTrack(data.item.track);
 			});
 
 			el.querySelector(".delete-saved").onclick = function () {
 				events.emit("deleteTrack", data.item.track);
-				states.saved = states.saved.filter(
-					(song) => song.track.id !== data.item.track.id,
-				);
-				el.remove();
+				//states.saved = states.saved.filter(
+				//(song) => song.track.id !== data.item.track.id,
+				//);
+				//el.remove();
 			};
 
 			batch.push(el);

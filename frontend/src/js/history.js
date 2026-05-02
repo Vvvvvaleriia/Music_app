@@ -1,6 +1,6 @@
 import { streamArray, asyncMap, incrementalRender } from "./render.js";
 import { events } from "./emitter.js";
-import { playTrack } from "./player.js";
+import { playTrack } from "./api.js";
 
 export function savePlayedTrack(track) {
 	console.log("TRACK:", track);
@@ -21,8 +21,10 @@ export function savePlayedTrack(track) {
 	if (!alreadyExists) {
 		listOfPlayed[date].push({
 			trackId: track.id,
+			uri: track.uri,
 			name: track.name,
 			artist: track.artists[0].name,
+			img: track.image,
 			playedAt: date,
 		});
 	}
@@ -37,7 +39,7 @@ function renderListened(item) {
 	</div>`;
 }
 
-function htmlGenerator(asyncIterator, batchSize = 4) {
+function htmlGenerator(asyncIterator, batchSize = 1) {
 	return async function* () {
 		let batch = [];
 
@@ -46,8 +48,9 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 			el.innerHTML = data.html;
 
 			el.querySelector(".play-listened").addEventListener("click", () => {
-				playTrack(data.item.track);
-				savePlayedTrack(data.item.track);
+				events.emit("playTrack", data.item);
+				//playTrack(data.item);
+				//savePlayedTrack(data.item);
 			});
 
 			batch.push(el);

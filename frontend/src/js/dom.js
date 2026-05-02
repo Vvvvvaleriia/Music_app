@@ -19,3 +19,4 @@ export const btn = document.querySelector("#set-time");
 export const playerBlock = document.querySelector(".block");
 export const searchDate = document.querySelector(".search-date");
 export const btnSearchListened = document.querySelector(".btn-seachDate");
+export const exitBtn = document.querySelector(".exit-btn");

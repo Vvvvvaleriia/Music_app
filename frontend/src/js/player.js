@@ -17,45 +17,6 @@ import { formatTime } from "./utils.js";
 
 //window.onSpotifyWebPlaybackSDKReady = () => {};
 
-export async function playTrack(track) {
-	const uri = track.uri;
-
-	await fetch(
-		`https://api.spotify.com/v1/me/player/play?device_id=${states.deviceId}`,
-		{
-			headers: {
-				Authorization: `Bearer ${states.token}`,
-				"Content-Type": "application/json",
-			},
-			method: "PUT",
-			body: JSON.stringify({
-				uris: [uri],
-			}),
-		},
-	);
-
-	playerBlock.style.display = "flex";
-	trackName.hidden = false;
-	trackArtist.hidden = false;
-	toggleBtn.hidden = false;
-	volumeUp.hidden = false;
-	volumeDown.hidden = false;
-	volumePrs.hidden = false;
-	trackImg.hidden = false;
-	currentTime.hidden = false;
-	durationTime.hidden = false;
-	input.hidden = false;
-	btn.hidden = false;
-
-	toggleBtn.textContent = "pause";
-
-	trackName.innerText = track.name;
-	trackArtist.innerHTML = track.artists[0].name;
-
-	const imgUrl = track.album.images[0].url;
-	trackImg.innerHTML = `<img src="${imgUrl}">`;
-}
-
 export async function initSpotifyPlayer() {
 	const player = new Spotify.Player({
 		name: "Start Player",

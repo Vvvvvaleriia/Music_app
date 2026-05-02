@@ -7,6 +7,7 @@ import {
 	savedTracks,
 	searchDate,
 	btnSearchListened,
+	exitBtn,
 } from "./dom.js";
 import { clientId, redirectUrl } from "./config.js";
 import { states } from "./state.js";
@@ -16,19 +17,27 @@ import {
 	saveTrack,
 	deleteSaved,
 	isTokenValid,
+	playTrack,
 } from "./api.js";
-import { initSpotifyPlayer, playTrack } from "./player.js";
+import { initSpotifyPlayer } from "./player.js";
 import { createTrackElement, render } from "./render.js";
 import { renderHistory, savePlayedTrack } from "./history.js";
 import { events } from "./emitter.js";
+import { visiblePanel } from "./utils.js";
 
 events.on("pageLoaded", render);
+events.on("pageLoaded", visiblePanel);
+
+//events.on("playTrack", showBlock);
+events.on("playTrack", playTrack);
+events.on("playTrack", savePlayedTrack);
 events.on("savedTrack", saveTrack);
 events.on("savedTrack", render);
 events.on("deleteTrack", deleteSaved);
 events.on("deleteTrack", render);
-events.on("playSaved", playTrack);
-events.on("playSaved", savePlayedTrack);
+//events.on("playSaved", playTrack);
+//events.on("playSaved", savePlayedTrack);
+
 let appReady = false;
 //events.on("historyOfListened", renderHistory);
 
@@ -56,16 +65,11 @@ btnSearchListened.onclick = function () {
 	return listened;
 };
 
-async function visiblePanel() {
-	document.querySelector(".login-page")?.remove();
-	btnLogin.hidden = true;
-	welcomeText.hidden = true;
-	inputSrch.hidden = false;
-	searchBtn.hidden = false;
-	savedTracks.hidden = false;
-	searchDate.hidden = false;
-	btnSearchListened.hidden = false;
-}
+exitBtn.onclick = function () {
+	localStorage.removeItem("token");
+	states.token = null;
+	window.location.href = "http://localhost:3000/";
+};
 
 async function startApp() {
 	const savedToken = localStorage.getItem("token");
@@ -74,7 +78,7 @@ async function startApp() {
 	if (savedToken) {
 		const valid = await isTokenValid(savedToken);
 		if (valid) {
-			await visiblePanel();
+			//await visiblePanel();
 			states.token = savedToken;
 			events.emit("pageLoaded");
 		} else {
@@ -84,7 +88,7 @@ async function startApp() {
 		if (code) {
 			states.token = await authorize(code);
 			localStorage.setItem("token", states.token);
-			await visiblePanel();
+			//await visiblePanel();
 			events.emit("pageLoaded");
 		}
 	}
