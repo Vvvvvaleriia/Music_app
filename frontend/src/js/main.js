@@ -27,19 +27,25 @@ import { visiblePanel } from "./utils.js";
 
 events.on("pageLoaded", render);
 events.on("pageLoaded", visiblePanel);
-
-//events.on("playTrack", showBlock);
 events.on("playTrack", playTrack);
 events.on("playTrack", savePlayedTrack);
 events.on("savedTrack", saveTrack);
 events.on("savedTrack", render);
 events.on("deleteTrack", deleteSaved);
 events.on("deleteTrack", render);
-//events.on("playSaved", playTrack);
-//events.on("playSaved", savePlayedTrack);
+events.on("search", async (textInput) => {
+	const result = await searchForType(textInput, "track");
+	const track = result.tracks.items[0];
+
+	events.emit("showTrack", track);
+});
+events.on("showTrack", (track) => {
+	const li = createTrackElement(track);
+	inputSrch.value = "";
+	songsList.appendChild(li);
+});
 
 let appReady = false;
-//events.on("historyOfListened", renderHistory);
 
 btnLogin.onclick = () => {
 	window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&scope=streaming user-read-email user-read-private user-modify-playback-state user-library-modify user-follow-modify playlist-modify-public user-library-read&redirect_uri=${encodeURIComponent(redirectUrl)}`;
@@ -47,13 +53,7 @@ btnLogin.onclick = () => {
 
 searchBtn.onclick = async function () {
 	const textInput = inputSrch.value;
-
-	const result = await searchForType(textInput, "track");
-	const track = result.tracks.items[0];
-
-	const li = createTrackElement(track);
-	inputSrch.value = "";
-	songsList.appendChild(li);
+	events.emit("search", textInput);
 };
 
 btnSearchListened.onclick = function () {
@@ -78,7 +78,6 @@ async function startApp() {
 	if (savedToken) {
 		const valid = await isTokenValid(savedToken);
 		if (valid) {
-			//await visiblePanel();
 			states.token = savedToken;
 			events.emit("pageLoaded");
 		} else {
@@ -88,7 +87,7 @@ async function startApp() {
 		if (code) {
 			states.token = await authorize(code);
 			localStorage.setItem("token", states.token);
-			//await visiblePanel();
+
 			events.emit("pageLoaded");
 		}
 	}

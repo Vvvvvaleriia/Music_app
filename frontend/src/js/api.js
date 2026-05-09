@@ -50,10 +50,10 @@ export async function searchForType(query, type) {
 	);
 
 	const data = await resp.json();
-	//return data;
 
 	if (resp.status == 401) {
 		window.alert("You need to re-authorize");
+		return;
 	}
 
 	return data;
@@ -78,6 +78,7 @@ export async function playTrack(track) {
 
 	if (resp.status == 401) {
 		window.alert("You need to re-authorize");
+		return;
 	}
 
 	playerBlock.style.display = "flex";
@@ -98,7 +99,7 @@ export async function playTrack(track) {
 	trackName.innerText = track.name;
 	trackArtist.innerHTML = track.artists[0].name;
 
-	const imgUrl = track.album.images[0].url; //|| track.image;
+	const imgUrl = track.album.images[0].url;
 	trackImg.innerHTML = `<img src="${imgUrl}">`;
 }
 
@@ -114,6 +115,7 @@ export async function loadSavedTracks() {
 
 	if (resp.status == 401) {
 		window.alert("You need to re-authorize");
+		return;
 	}
 
 	return savedSngs.items;
@@ -121,7 +123,7 @@ export async function loadSavedTracks() {
 
 export async function saveTrack(track) {
 	const uris = `spotify:track:${track.id}`;
-	await fetch(
+	const resp = await fetch(
 		`https://api.spotify.com/v1/me/library?uris=${encodeURIComponent(uris)}`,
 		{
 			headers: {
@@ -134,12 +136,13 @@ export async function saveTrack(track) {
 
 	if (resp.status == 401) {
 		window.alert("You need to re-authorize");
+		return;
 	}
 }
 
 export async function deleteSaved(track) {
 	const uris = `spotify:track:${track.id}`;
-	await fetch(
+	const resp = await fetch(
 		`https://api.spotify.com/v1/me/library?uris=${encodeURIComponent(uris)}`,
 		{
 			headers: {
@@ -151,5 +154,6 @@ export async function deleteSaved(track) {
 
 	if (resp.status == 401) {
 		window.alert("You need to re-authorize");
+		return;
 	}
 }

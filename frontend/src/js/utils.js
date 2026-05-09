@@ -20,6 +20,7 @@ import {
 	btn,
 	exitBtn,
 } from "./dom.js";
+import { searchForType } from "./api.js";
 
 export function formatTime(ms) {
 	const totalSeconds = Math.floor(ms / 1000);
