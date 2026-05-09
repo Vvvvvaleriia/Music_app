@@ -17,12 +17,12 @@ export function createTrackElement(track) {
 	const btnSave = li.querySelector(".save-btn");
 
 	btnPlay.addEventListener("click", () => {
+		console.log(track, "============", "TRACK");
 		events.emit("playTrack", track);
 		//playTrack(track);
 		//savePlayedTrack(track);
 	});
 	btnSave.onclick = function () {
-		states.saved.push(track);
 		events.emit("savedTrack", track);
 	};
 
@@ -74,17 +74,17 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 			el.innerHTML = data.html;
 
 			el.querySelector(".play-saved").addEventListener("click", () => {
-				events.emit("playTrack", data.item.track);
-				//playTrack(data.item.track);
-				//savePlayedTrack(data.item.track);
+				//events.emit("playTrack", data.item.track);
+				playTrack(data.item.track);
+				savePlayedTrack(data.item.track);
 			});
 
 			el.querySelector(".delete-saved").onclick = function () {
 				events.emit("deleteTrack", data.item.track);
-				//states.saved = states.saved.filter(
-				//(song) => song.track.id !== data.item.track.id,
-				//);
-				//el.remove();
+				// states.saved = states.saved.filter(
+				// 	(song) => song.track.id !== data.item.track.id,
+				// );
+				// el.remove();
 			};
 
 			batch.push(el);

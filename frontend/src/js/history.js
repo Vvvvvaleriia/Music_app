@@ -15,18 +15,11 @@ export function savePlayedTrack(track) {
 	}
 
 	const alreadyExists = listOfPlayed[date].some(
-		(song) => song.trackId === track.id,
+		(song) => song.id === track.id,
 	);
 
 	if (!alreadyExists) {
-		listOfPlayed[date].push({
-			trackId: track.id,
-			uri: track.uri,
-			name: track.name,
-			artist: track.artists[0].name,
-			img: track.image,
-			playedAt: date,
-		});
+		listOfPlayed[date].push(track);
 	}
 	localStorage.setItem("listenedHistory", JSON.stringify(listOfPlayed));
 	console.log(date);
@@ -34,7 +27,7 @@ export function savePlayedTrack(track) {
 
 function renderListened(item) {
 	return `<div class="history-tracks">
-	<span>${item.name} - ${item.artist}</span> 
+	<span>${item.name} - ${item.artists[0].name}</span> 
 	<button class="play-listened">play</button> 
 	</div>`;
 }
@@ -48,6 +41,7 @@ function htmlGenerator(asyncIterator, batchSize = 1) {
 			el.innerHTML = data.html;
 
 			el.querySelector(".play-listened").addEventListener("click", () => {
+				console.log(data.item, "============", "DATA.ITEM");
 				events.emit("playTrack", data.item);
 				//playTrack(data.item);
 				//savePlayedTrack(data.item);
@@ -67,8 +61,10 @@ function htmlGenerator(asyncIterator, batchSize = 1) {
 }
 
 export async function renderHistory(date) {
-	const historyList = document.querySelector(".history-container");
+	const historyList = document.querySelector(".render-listened");
 	const listened = JSON.parse(localStorage.getItem("listenedHistory"));
+
+	historyList.innerHTML = "";
 
 	const tracks = listened[date];
 

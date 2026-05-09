@@ -50,13 +50,19 @@ export async function searchForType(query, type) {
 	);
 
 	const data = await resp.json();
+	//return data;
+
+	if (resp.status == 401) {
+		window.alert("You need to re-authorize");
+	}
+
 	return data;
 }
 
 export async function playTrack(track) {
 	const uri = track.uri;
 
-	await fetch(
+	const resp = await fetch(
 		`https://api.spotify.com/v1/me/player/play?device_id=${states.deviceId}`,
 		{
 			headers: {
@@ -69,6 +75,10 @@ export async function playTrack(track) {
 			}),
 		},
 	);
+
+	if (resp.status == 401) {
+		window.alert("You need to re-authorize");
+	}
 
 	playerBlock.style.display = "flex";
 	trackName.hidden = false;
@@ -101,6 +111,11 @@ export async function loadSavedTracks() {
 	});
 
 	const savedSngs = await resp.json();
+
+	if (resp.status == 401) {
+		window.alert("You need to re-authorize");
+	}
+
 	return savedSngs.items;
 }
 
@@ -116,6 +131,10 @@ export async function saveTrack(track) {
 			method: "PUT",
 		},
 	);
+
+	if (resp.status == 401) {
+		window.alert("You need to re-authorize");
+	}
 }
 
 export async function deleteSaved(track) {
@@ -129,4 +148,8 @@ export async function deleteSaved(track) {
 			method: "DELETE",
 		},
 	);
+
+	if (resp.status == 401) {
+		window.alert("You need to re-authorize");
+	}
 }
