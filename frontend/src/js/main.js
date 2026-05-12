@@ -24,6 +24,7 @@ import { createTrackElement, render } from "./render.js";
 import { renderHistory, savePlayedTrack } from "./history.js";
 import { events } from "./emitter.js";
 import { visiblePanel } from "./utils.js";
+import { loggedSearch } from "./logging.js";
 
 events.on("pageLoaded", render);
 events.on("pageLoaded", visiblePanel);
@@ -33,16 +34,22 @@ events.on("savedTrack", saveTrack);
 events.on("savedTrack", render);
 events.on("deleteTrack", deleteSaved);
 events.on("deleteTrack", render);
+
 events.on("search", async (textInput) => {
 	const result = await searchForType(textInput, "track");
-	const track = result.tracks.items[0];
+	const tracks = result.tracks.items;
 
-	events.emit("showTrack", track);
+	events.emit("showTrack", tracks);
 });
-events.on("showTrack", (track) => {
-	const li = createTrackElement(track);
+events.on("showTrack", (tracks) => {
+	songsList.innerHTML = "";
+
+	tracks.forEach((track) => {
+		const li = createTrackElement(track);
+		songsList.appendChild(li);
+	});
+
 	inputSrch.value = "";
-	songsList.appendChild(li);
 });
 
 let appReady = false;

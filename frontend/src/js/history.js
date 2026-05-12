@@ -25,10 +25,10 @@ export function savePlayedTrack(track) {
 }
 
 function renderListened(item) {
-	return `<div class="history-tracks">
+	return `<li class="history-tracks">
 	<span>${item.name} - ${item.artists[0].name}</span> 
 	<button class="play-listened">play</button> 
-	</div>`;
+	</li>`;
 }
 
 function htmlGenerator(asyncIterator, batchSize = 1) {
