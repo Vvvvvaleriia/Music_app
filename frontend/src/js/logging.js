@@ -1,5 +1,3 @@
-import { playTrack, searchForType } from "./api.js";
-
 function formatMessage(data) {
 	const time = new Date().toLocaleDateString("en-En", {
 		hour: "2-digit",
@@ -38,20 +36,65 @@ function writeLog(data) {
 
 function log(level) {
 	function decorator(fn) {
-		function newFunc(...args) {
-			let fnName = "anonymous";
-			if (fn.name) {
-				fnName = fn.name;
-			}
+		let fnName = "anonymous";
 
-			if (level === "DEBUG") {
-				writeLog({ level, fnName, phase: "call", args });
-				const result = fn(...args);
-				writeLog({ level, fnName, phase: "result", result });
-				return result;
-			}
+		if (fn.name) {
+			fnName = fn.Name;
 		}
-		return newFunc;
+
+		return function (...args) {
+			const start = Date.now();
+
+			if (level != "ERROR") {
+				writeLog({
+					level,
+					fnName,
+					phase: "call",
+					args,
+				});
+
+				try {
+					const result = fn(...args);
+					const duration = Date.now() - start;
+
+					writeLog({
+						level,
+						fnName,
+						phase: "result",
+						result,
+						duration,
+					});
+
+					return result;
+				} catch (e) {
+					const duration = Date.now() - start;
+
+					writeLog({
+						level: "ERROR",
+						fnName,
+						phase: "error",
+						error: e,
+						duration,
+					});
+				}
+			} else {
+				try {
+					const result = fn(...args);
+					return result;
+				} catch (e) {
+					const duration = Date.now() - start;
+
+					writeLog({
+						level: "ERROR",
+						fnName,
+						phase: "error",
+						error: e,
+						duration,
+					});
+				}
+			}
+		};
 	}
+
 	return decorator;
 }

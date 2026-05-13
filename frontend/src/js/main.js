@@ -24,7 +24,6 @@ import { createTrackElement, render } from "./render.js";
 import { renderHistory, savePlayedTrack } from "./history.js";
 import { events } from "./emitter.js";
 import { visiblePanel } from "./utils.js";
-import { loggedSearch } from "./logging.js";
 
 events.on("pageLoaded", render);
 events.on("pageLoaded", visiblePanel);
