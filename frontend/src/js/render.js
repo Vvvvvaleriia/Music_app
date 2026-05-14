@@ -56,11 +56,11 @@ function memoize(fn) {
 }
 
 const renderTracks = memoize((item) => {
-	return `<div class="saved-items">
+	return `<li class="saved-items">
 	<span>${item.track.name} - ${item.track.artists[0].name}</span> 
 	<button class="play-saved">play</button> 
 	<button class="delete-saved">delete</button>
-	</div>`;
+	</li>`;
 });
 
 function htmlGenerator(asyncIterator, batchSize = 4) {

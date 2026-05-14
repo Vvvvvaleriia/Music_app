@@ -42,7 +42,7 @@
 				<div id="save-track" class="save-track" hidden>
 					Saved tracks
 				</div>
-				<div class="tracks"></div>
+				<li class="tracks"></li>
 			</div>
 
 			<div class="block" hidden>
@@ -63,15 +63,14 @@
 						Play
 					</button>
 					<input
-						type="number"
+						type="range"
 						id="time-input"
 						class="time-input"
-						placeholder="seconds"
+						min="0"
+						max="100"
+						value="0"
 						hidden
 					/>
-					<button id="set-time" class="set-time" hidden>
-						Set time
-					</button>
 					<div class="time">
 						<p id="current-time" class="current-time" hidden>
 							00:00

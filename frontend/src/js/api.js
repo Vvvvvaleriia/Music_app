@@ -10,7 +10,6 @@ import {
 	currentTime,
 	durationTime,
 	input,
-	btn,
 	playerBlock,
 } from "./dom.js";
 
@@ -91,7 +90,6 @@ export async function playTrack(track) {
 	currentTime.hidden = false;
 	durationTime.hidden = false;
 	input.hidden = false;
-	btn.hidden = false;
 
 	toggleBtn.textContent = "pause";
 

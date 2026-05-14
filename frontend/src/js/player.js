@@ -9,7 +9,6 @@ import {
 	currentTime,
 	durationTime,
 	input,
-	btn,
 	playerBlock,
 } from "./dom.js";
 import { states } from "./state.js";
@@ -76,9 +75,9 @@ export async function initSpotifyPlayer() {
 		const isPaused = state.paused;
 
 		if (isPaused) {
-			toggleBtn.textContent = "play";
+			toggleBtn.textContent = "▶";
 		} else {
-			toggleBtn.textContent = "pause";
+			toggleBtn.textContent = "⏸";
 		}
 
 		if (state.position === 0 && state.paused) {
@@ -86,11 +85,21 @@ export async function initSpotifyPlayer() {
 		}
 	});
 
-	btn.addEventListener("click", () => {
-		const seconds = Number(input.value);
-		const ms = seconds * 1000;
-		player.seek(ms).then(() => {});
-		setTrackTime(seconds);
+	player.addListener("player_state_changed", (state) => {
+		states.current = state.position;
+		states.durationTimeValue = state.duration;
+
+		input.max = Math.floor(states.durationTimeValue / 1000);
+
+		input.value = Math.floor(states.current / 1000);
+
+		currentTime.textContent = formatTime(states.current);
+
+		durationTime.textContent = formatTime(states.durationTimeValue);
+	});
+
+	input.addEventListener("input", () => {
+		player.seek(input.value * 1000);
 	});
 
 	player.connect();
