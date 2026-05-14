@@ -6,21 +6,8 @@ import {
 	savedTracks,
 	searchDate,
 	btnSearchListened,
-	playerBlock,
-	trackName,
-	trackArtist,
-	toggleBtn,
-	volumeUp,
-	volumeDown,
-	volumePrs,
-	trackImg,
-	durationTime,
-	currentTime,
-	input,
-	btn,
 	exitBtn,
 } from "./dom.js";
-import { searchForType } from "./api.js";
 
 export function formatTime(ms) {
 	const totalSeconds = Math.floor(ms / 1000);
@@ -41,28 +28,3 @@ export async function visiblePanel() {
 	btnSearchListened.hidden = false;
 	exitBtn.hidden = false;
 }
-
-/*
-export function showBlock(track) {
-	playerBlock.style.display = "flex";
-	trackName.hidden = false;
-	trackArtist.hidden = false;
-	toggleBtn.hidden = false;
-	volumeUp.hidden = false;
-	volumeDown.hidden = false;
-	volumePrs.hidden = false;
-	trackImg.hidden = false;
-	currentTime.hidden = false;
-	durationTime.hidden = false;
-	input.hidden = false;
-	btn.hidden = false;
-
-	toggleBtn.textContent = "pause";
-
-	trackName.innerText = track.name;
-	trackArtist.innerHTML = track.artists[0].name;
-
-	const imgUrl = track.album.images[0].url; //|| track.image;
-	trackImg.innerHTML = `<img src="${imgUrl}">`;
-}
-*/

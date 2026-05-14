@@ -15,8 +15,6 @@ import {
 import { states } from "./state.js";
 import { formatTime } from "./utils.js";
 
-//window.onSpotifyWebPlaybackSDKReady = () => {};
-
 export async function initSpotifyPlayer() {
 	const player = new Spotify.Player({
 		name: "Start Player",
@@ -35,7 +33,6 @@ export async function initSpotifyPlayer() {
 	);
 
 	player.addListener("ready", async ({ device_id }) => {
-		console.log("Ready with Device ID", device_id);
 		states.deviceId = device_id;
 
 		const state = await player.getVolume();
@@ -92,18 +89,14 @@ export async function initSpotifyPlayer() {
 	btn.addEventListener("click", () => {
 		const seconds = Number(input.value);
 		const ms = seconds * 1000;
-		player.seek(ms).then(() => {
-			console.log("Position changed");
-		});
+		player.seek(ms).then(() => {});
 		setTrackTime(seconds);
 	});
 
 	player.connect();
 
 	toggleBtn.onclick = () => {
-		player.togglePlay().then(() => {
-			console.log("Toggled playback");
-		});
+		player.togglePlay().then(() => {});
 	};
 
 	volumeUp.onclick = () => {

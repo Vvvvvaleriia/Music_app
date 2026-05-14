@@ -2,8 +2,6 @@ import { streamArray, asyncMap, incrementalRender } from "./render.js";
 import { events } from "./emitter.js";
 
 export function savePlayedTrack(track) {
-	console.log("TRACK:", track);
-
 	const date = new Date().toISOString().split("T")[0];
 
 	const listOfPlayed =
@@ -21,7 +19,6 @@ export function savePlayedTrack(track) {
 		listOfPlayed[date].push(track);
 	}
 	localStorage.setItem("listenedHistory", JSON.stringify(listOfPlayed));
-	console.log(date);
 }
 
 function renderListened(item) {

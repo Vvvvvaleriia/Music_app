@@ -1,4 +1,3 @@
-import { savedTracks } from "./dom.js";
 import { states } from "./state.js";
 import {
 	trackName,

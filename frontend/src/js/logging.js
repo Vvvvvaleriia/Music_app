@@ -1,3 +1,14 @@
+import {
+	deleteSaved,
+	loadSavedTracks,
+	playTrack,
+	searchForType,
+	saveTrack,
+	authorize,
+} from "./api.js";
+import { renderHistory } from "./history.js";
+import { render } from "./render.js";
+
 function formatMessage(data) {
 	const time = new Date().toLocaleDateString("en-En", {
 		hour: "2-digit",
@@ -34,67 +45,113 @@ function writeLog(data) {
 	}
 }
 
-function log(level) {
+export function log(level) {
 	function decorator(fn) {
 		let fnName = "anonymous";
+		const isAsync = fn.constructor.name == "AsyncFunction";
 
 		if (fn.name) {
-			fnName = fn.Name;
+			fnName = fn.name;
 		}
 
-		return function (...args) {
-			const start = Date.now();
+		if (!isAsync) {
+			return function (...args) {
+				const start = Date.now();
+				if (level != "ERROR") {
+					writeLog({ level, fnName, phase: "call", args });
 
-			if (level != "ERROR") {
-				writeLog({
-					level,
-					fnName,
-					phase: "call",
-					args,
-				});
-
-				try {
-					const result = fn(...args);
-					const duration = Date.now() - start;
-
-					writeLog({
-						level,
-						fnName,
-						phase: "result",
-						result,
-						duration,
-					});
-
-					return result;
-				} catch (e) {
-					const duration = Date.now() - start;
-
-					writeLog({
-						level: "ERROR",
-						fnName,
-						phase: "error",
-						error: e,
-						duration,
-					});
+					try {
+						const result = fn(...args);
+						const duration = Date.now() - start;
+						writeLog({
+							level,
+							fnName,
+							phase: "result",
+							result,
+							duration,
+						});
+						return result;
+					} catch (e) {
+						const duration = Date.now() - start;
+						writeLog({
+							level: "ERROR",
+							error: e,
+							fnName,
+							phase: "error",
+							duration,
+						});
+					}
+				} else {
+					const start = Date.now();
+					try {
+						const result = fn(...args);
+						return result;
+					} catch (e) {
+						const duration = Date.now() - start;
+						writeLog({
+							level: "ERROR",
+							error: e,
+							fnName,
+							phase: "error",
+							duration,
+						});
+					}
 				}
-			} else {
-				try {
-					const result = fn(...args);
-					return result;
-				} catch (e) {
-					const duration = Date.now() - start;
+			};
+		} else {
+			return async function (...args) {
+				const start = Date.now();
+				if (level != "ERROR") {
+					writeLog({ level, fnName, phase: "call", args });
 
-					writeLog({
-						level: "ERROR",
-						fnName,
-						phase: "error",
-						error: e,
-						duration,
-					});
+					try {
+						const result = await fn(...args);
+						const duration = Date.now() - start;
+						writeLog({
+							level,
+							fnName,
+							phase: "result",
+							result,
+							duration,
+						});
+						return result;
+					} catch (e) {
+						const duration = Date.now() - start;
+						writeLog({
+							level: "ERROR",
+							error: e,
+							fnName,
+							phase: "error",
+							duration,
+						});
+					}
+				} else {
+					const start = Date.now();
+					try {
+						const result = await fn(...args);
+						return result;
+					} catch (e) {
+						const duration = Date.now() - start;
+						writeLog({
+							level: "ERROR",
+							error: e,
+							fnName,
+							phase: "error",
+							duration,
+						});
+					}
 				}
-			}
-		};
+			};
+		}
 	}
-
 	return decorator;
 }
+
+export const loggedAuthorize = log("ERROR")(authorize);
+export const loggedSearch = log("INFO")(searchForType);
+export const loggedPlayTrack = log("INFO")(playTrack);
+export const loggedLoadSaved = log("INFO")(loadSavedTracks);
+export const loggedSaveTrack = log("INFO")(saveTrack);
+export const loggedDeleteTrack = log("INFO")(deleteSaved);
+export const loggedHistoryRender = log("INFO")(renderHistory);
+export const loggedRender = log("INFO")(render);

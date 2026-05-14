@@ -1,41 +1,41 @@
 import {
 	btnLogin,
-	welcomeText,
 	searchBtn,
 	inputSrch,
 	songsList,
-	savedTracks,
 	searchDate,
 	btnSearchListened,
 	exitBtn,
 } from "./dom.js";
 import { clientId, redirectUrl } from "./config.js";
 import { states } from "./state.js";
-import {
-	authorize,
-	searchForType,
-	saveTrack,
-	deleteSaved,
-	isTokenValid,
-	playTrack,
-} from "./api.js";
+import { isTokenValid } from "./api.js";
 import { initSpotifyPlayer } from "./player.js";
 import { createTrackElement, render } from "./render.js";
 import { renderHistory, savePlayedTrack } from "./history.js";
 import { events } from "./emitter.js";
 import { visiblePanel } from "./utils.js";
+import {
+	loggedSearch,
+	loggedDeleteTrack,
+	loggedHistoryRender,
+	loggedPlayTrack,
+	loggedRender,
+	loggedSaveTrack,
+	loggedAuthorize,
+} from "./logging.js";
 
-events.on("pageLoaded", render);
+events.on("pageLoaded", loggedRender);
 events.on("pageLoaded", visiblePanel);
-events.on("playTrack", playTrack);
+events.on("playTrack", loggedPlayTrack);
 events.on("playTrack", savePlayedTrack);
-events.on("savedTrack", saveTrack);
-events.on("savedTrack", render);
-events.on("deleteTrack", deleteSaved);
-events.on("deleteTrack", render);
+events.on("savedTrack", loggedSaveTrack);
+events.on("savedTrack", loggedRender);
+events.on("deleteTrack", loggedDeleteTrack);
+events.on("deleteTrack", loggedRender);
 
 events.on("search", async (textInput) => {
-	const result = await searchForType(textInput, "track");
+	const result = await loggedSearch(textInput, "track");
 	const tracks = result.tracks.items;
 
 	events.emit("showTrack", tracks);
@@ -64,14 +64,13 @@ searchBtn.onclick = async function () {
 
 btnSearchListened.onclick = function () {
 	const date = searchDate.value;
-	const listened = renderHistory(date);
-	//events.emit("historyOfListened", date);
+	const listened = loggedHistoryRender(date);
 	searchDate.value = "";
 
 	return listened;
 };
 
-exitBtn.onclick = function () {
+exitBtn.onclick = function logout() {
 	localStorage.removeItem("token");
 	states.token = null;
 	window.location.href = "http://localhost:3000/";
@@ -91,7 +90,7 @@ async function startApp() {
 		}
 	} else {
 		if (code) {
-			states.token = await authorize(code);
+			states.token = await loggedAuthorize(code);
 			localStorage.setItem("token", states.token);
 
 			events.emit("pageLoaded");
@@ -104,13 +103,11 @@ async function startApp() {
 
 function initIfPossible() {
 	if (appReady && states.token) {
-		console.log("INIT PLAYER");
 		initSpotifyPlayer();
 	}
 }
 
 startApp();
 window.onSpotifyWebPlaybackSDKReady = () => {
-	console.log("TRY INIT");
 	initIfPossible();
 };

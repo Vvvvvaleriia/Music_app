@@ -3,6 +3,7 @@ import { states } from "./state.js";
 import { savePlayedTrack } from "./history.js";
 import { events } from "./emitter.js";
 import { loadSavedTracks } from "./api.js";
+import { loggedLoadSaved } from "./logging.js";
 
 export function createTrackElement(track) {
 	const li = document.createElement("li");
@@ -17,10 +18,7 @@ export function createTrackElement(track) {
 	const btnSave = li.querySelector(".save-btn");
 
 	btnPlay.addEventListener("click", () => {
-		console.log(track, "============", "TRACK");
 		events.emit("playTrack", track);
-		//playTrack(track);
-		//savePlayedTrack(track);
 	});
 	btnSave.onclick = function () {
 		events.emit("savedTrack", track);
@@ -74,17 +72,11 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 			el.innerHTML = data.html;
 
 			el.querySelector(".play-saved").addEventListener("click", () => {
-				//events.emit("playTrack", data.item.track);
-				playTrack(data.item.track);
-				savePlayedTrack(data.item.track);
+				events.emit("playTrack", data.item.track);
 			});
 
 			el.querySelector(".delete-saved").onclick = function () {
 				events.emit("deleteTrack", data.item.track);
-				// states.saved = states.saved.filter(
-				// 	(song) => song.track.id !== data.item.track.id,
-				// );
-				// el.remove();
 			};
 
 			batch.push(el);
@@ -111,7 +103,7 @@ export async function render() {
 
 	tracksDiv.innerHTML = "";
 
-	const tracks = await loadSavedTracks();
+	const tracks = await loggedLoadSaved();
 
 	if (tracks) {
 		const streamTracks = streamArray(tracks);
