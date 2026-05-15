@@ -1,3 +1,4 @@
+import { addItemsToPlaylist, createPlaylist } from "./api.js";
 import {
 	btnLogin,
 	welcomeText,
@@ -27,4 +28,38 @@ export async function visiblePanel() {
 	searchDate.hidden = false;
 	btnSearchListened.hidden = false;
 	exitBtn.hidden = false;
+}
+
+async function getPlaylistLink(playlistId) {
+	return `https://open.spotify.com/playlist/${playlistId}`;
+}
+
+async function createPlaylistHistory(tracks, date) {
+	const playlist = await createPlaylist(date);
+
+	const uris = tracks.map((t) => t.uri);
+	await addItemsToPlaylist(playlist.id, uris);
+
+	const link = getPlaylistLink(playlist.id);
+	console.log(link);
+
+	return link;
+}
+
+export async function buttonDownload(container, tracks, date) {
+	const oldBtn = document.querySelector(".download-btn");
+	if (oldBtn) oldBtn.remove();
+
+	const download = document.createElement("button");
+	download.className = "download-btn";
+	download.textContent = "download";
+
+	download.addEventListener("click", async () => {
+		const link = await createPlaylistHistory(tracks, date);
+
+		await navigator.clipboard.writeText(link);
+		alert("Link copied!");
+	});
+
+	container.appendChild(download);
 }

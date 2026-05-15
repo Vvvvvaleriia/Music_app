@@ -154,3 +154,37 @@ export async function deleteSaved(track) {
 		return;
 	}
 }
+
+export async function createPlaylist(name) {
+	const resp = await fetch(`https://api.spotify.com/v1/me/playlists`, {
+		headers: {
+			Authorization: `Bearer ${states.token}`,
+			"Content-Type": "application/json",
+		},
+		method: "POST",
+		body: JSON.stringify({
+			name: name,
+			description: "For friends",
+			public: false,
+		}),
+	});
+
+	const data = await resp.json();
+	states.playlistId = data.id;
+
+	return data;
+}
+
+export async function addItemsToPlaylist(playlistId, uris) {
+	const resp = await fetch(
+		`https://api.spotify.com/v1/playlists/${playlistId}/items`,
+		{
+			headers: {
+				Authorization: `Bearer ${states.token}`,
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+			body: JSON.stringify({ uris }),
+		},
+	);
+}

@@ -7,4 +7,5 @@ export const states = {
 	durationTimeValue: 0,
 	isActive: false,
 	saved: [],
+	playlistId: null,
 };

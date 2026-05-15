@@ -54,7 +54,7 @@ events.on("showTrack", (tracks) => {
 let appReady = false;
 
 btnLogin.onclick = () => {
-	window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&scope=streaming user-read-email user-read-private user-modify-playback-state user-library-modify user-follow-modify playlist-modify-public user-library-read&redirect_uri=${encodeURIComponent(redirectUrl)}`;
+	window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&scope=streaming user-read-email user-read-private user-modify-playback-state user-library-modify user-follow-modify playlist-modify-public playlist-modify-private user-library-read&redirect_uri=${encodeURIComponent(redirectUrl)}`;
 };
 
 searchBtn.onclick = async function () {
