@@ -1,19 +1,41 @@
-const { states } = require("./state");
+import { states } from "./state.js";
 
 class ApiProxy {
 	#rateLimit;
+	#requestsLog;
 
 	constructor() {
 		this.#rateLimit = { max: 30, windowMs: 10000 };
+		this.#requestsLog = [];
+	}
+
+	#checkRateLimit() {
+		const now = Date.now;
+		this.#requestsLog = this.#requestsLog.filter(
+			(t) => now - t < this.#rateLimit.windowMs,
+		);
+
+		if (this.#requestsLog.length >= this.#rateLimit.max) {
+			return true;
+		}
+		return false;
 	}
 
 	async request(url, options = {}) {
+		if (this.#checkRateLimit()) {
+			console.warn("Rate limit error");
+			await new Promise((r) =>
+				setTimeout(r, this.#checkRateLimit.windowMs),
+			);
+			return this.request(url, options);
+		}
 		const method = options.method || "GET";
 		const headers = {
 			Authorization: `Bearer ${states.token}`,
 			...options.headers,
 		};
 
+		this.#requestsLog.push(Date.now());
 		const resp = await fetch(url, { method, headers });
 		return resp;
 	}
