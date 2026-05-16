@@ -22,10 +22,12 @@ const server = http.createServer((req, resp) => {
 
 	if (req.method === "POST") {
 		if (req.url === "/api/access") {
+			console.log(req);
 			let body = "";
 			req.on("data", (chunk) => {
 				body += chunk;
 			});
+			console.log(body);
 
 			req.on("end", () => {
 				const data = JSON.parse(body);
@@ -53,7 +55,10 @@ const server = http.createServer((req, resp) => {
 						});
 						console.log(data);
 						return resp.end(
-							JSON.stringify({ token: data.access_token }),
+							JSON.stringify({
+								token: data.access_token,
+								refreshToken: data.refresh_token,
+							}),
 						);
 					});
 			});

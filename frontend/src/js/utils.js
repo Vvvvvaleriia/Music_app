@@ -37,11 +37,10 @@ async function getPlaylistLink(playlistId) {
 async function createPlaylistHistory(tracks, date) {
 	const playlist = await createPlaylist(date);
 
-	const uris = tracks.map((t) => t.uri);
+	const uris = tracks.map((track) => track.uri);
 	await addItemsToPlaylist(playlist.id, uris);
 
 	const link = getPlaylistLink(playlist.id);
-	console.log(link);
 
 	return link;
 }

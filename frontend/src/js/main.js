@@ -9,7 +9,7 @@ import {
 } from "./dom.js";
 import { clientId, redirectUrl } from "./config.js";
 import { states } from "./state.js";
-import { isTokenValid } from "./api.js";
+import { getRefreshToken, isTokenValid } from "./api.js";
 import { initSpotifyPlayer } from "./player.js";
 import { createTrackElement, render } from "./render.js";
 import { renderHistory, savePlayedTrack } from "./history.js";
@@ -77,7 +77,7 @@ exitBtn.onclick = function logout() {
 };
 
 async function startApp() {
-	const savedToken = localStorage.getItem("token");
+	const savedToken = localStorage.getItem("access_token");
 	const code = window.location.search.replace("?code=", "");
 
 	if (savedToken) {
@@ -86,12 +86,19 @@ async function startApp() {
 			states.token = savedToken;
 			events.emit("pageLoaded");
 		} else {
-			localStorage.removeItem("token");
+			try {
+				const newToken = await getRefreshToken();
+				states.token = newToken;
+				events.emit("pageLoaded");
+			} catch {
+				localStorage.removeItem("access_token");
+				localStorage.removeItem("refresh_token");
+			}
 		}
 	} else {
 		if (code) {
 			states.token = await loggedAuthorize(code);
-			localStorage.setItem("token", states.token);
+			//localStorage.setItem("token", states.token);
 
 			events.emit("pageLoaded");
 		}

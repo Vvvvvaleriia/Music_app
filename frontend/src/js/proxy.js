@@ -31,12 +31,20 @@ class ApiProxy {
 		}
 		const method = options.method || "GET";
 		const headers = {
-			Authorization: `Bearer ${states.token}`,
 			...options.headers,
 		};
 
+		if (states.token) {
+			headers["Authorization"] = `Bearer ${states.token}`;
+		}
+		if (!options?.headers?.["Content-Type"]) {
+			headers["Content-Type"] = "application/json";
+		}
+
 		this.#requestsLog.push(Date.now());
-		const resp = await fetch(url, { method, headers });
+		const resp = await fetch(url, { method, headers, body: options.body });
 		return resp;
 	}
 }
+
+export default new ApiProxy();

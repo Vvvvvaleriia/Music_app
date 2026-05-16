@@ -8,6 +8,7 @@ import {
 } from "./api.js";
 import { renderHistory } from "./history.js";
 import { render } from "./render.js";
+import { buttonDownload } from "./utils.js";
 
 function formatMessage(data) {
 	const time = new Date().toLocaleDateString("en-En", {
@@ -155,3 +156,4 @@ export const loggedSaveTrack = log("INFO")(saveTrack);
 export const loggedDeleteTrack = log("INFO")(deleteSaved);
 export const loggedHistoryRender = log("INFO")(renderHistory);
 export const loggedRender = log("INFO")(render);
+export const loggedButtonDownload = log("INFO")(buttonDownload);

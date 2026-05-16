@@ -1,6 +1,7 @@
 import { streamArray, asyncMap, incrementalRender } from "./render.js";
 import { events } from "./emitter.js";
 import { buttonDownload } from "./utils.js";
+import { loggedButtonDownload } from "./logging.js";
 
 export function savePlayedTrack(track) {
 	const date = new Date().toISOString().split("T")[0];
@@ -84,6 +85,6 @@ export async function renderHistory(date) {
 		const generator = htmlGenerator(mappedHistory);
 		await incrementalRender(historyList, generator());
 
-		buttonDownload(historyList, tracks, date);
+		loggedButtonDownload(historyList, tracks, date);
 	}
 }
