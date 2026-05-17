@@ -30,7 +30,7 @@ export async function authorize(code) {
 	const data = await response.json();
 
 	console.log(data);
-	localStorage.setItem("acces_token", data.token);
+	localStorage.setItem("access_token", data.token);
 	localStorage.setItem("refresh_token", data.refreshToken);
 
 	return data.token;
@@ -49,23 +49,22 @@ export async function isTokenValid(token) {
 export async function getRefreshToken() {
 	const refreshToken = localStorage.getItem("refresh_token");
 
-	const resp = await fetch(`https://accounts.spotify.com/api/token`, {
-		headers: {
-			"Content-Type": "application/x-www-form-urlencoded",
-		},
+	const resp = await proxy.request("http://127.0.0.1:5000/api/access", {
 		method: "POST",
-		body: new URLSearchParams({
-			grant_type: "refresh_token",
+		body: JSON.stringify({
 			refresh_token: refreshToken,
-			//client_id: clientId,
 		}),
 	});
 
 	const data = await resp.json();
 
-	localStorage.setItem("access_token", data.access_token);
+	localStorage.setItem("access_token", data.token);
 
-	return data.access_token;
+	if (data.refreshToken) {
+		localStorage.setItem("refresh_token", data.refreshToken);
+	}
+
+	return data.token;
 }
 
 export async function searchForType(query, type) {

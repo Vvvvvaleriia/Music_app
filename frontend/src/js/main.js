@@ -71,7 +71,7 @@ btnSearchListened.onclick = function () {
 };
 
 exitBtn.onclick = function logout() {
-	localStorage.removeItem("token");
+	localStorage.removeItem("access_token");
 	states.token = null;
 	window.location.href = "http://localhost:3000/";
 };
@@ -98,7 +98,7 @@ async function startApp() {
 	} else {
 		if (code) {
 			states.token = await loggedAuthorize(code);
-			//localStorage.setItem("token", states.token);
+			localStorage.setItem("access_token", states.token);
 
 			events.emit("pageLoaded");
 		}
