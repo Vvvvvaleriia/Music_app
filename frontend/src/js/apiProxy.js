@@ -1,3 +1,4 @@
+import { getRefreshToken } from "./api.js";
 import { states } from "./state.js";
 
 class ApiProxy {
@@ -10,7 +11,7 @@ class ApiProxy {
 	}
 
 	#checkRateLimit() {
-		const now = Date.now;
+		const now = Date.now();
 		this.#requestsLog = this.#requestsLog.filter(
 			(t) => now - t < this.#rateLimit.windowMs,
 		);
@@ -42,7 +43,19 @@ class ApiProxy {
 		}
 
 		this.#requestsLog.push(Date.now());
-		const resp = await fetch(url, { method, headers, body: options.body });
+		let resp = await fetch(url, { method, headers, body: options.body });
+
+		if (resp.status === 401) {
+			const newToken = await getRefreshToken();
+
+			states.token = newToken;
+			token = newToken;
+			localStorage.setItem("access_token", newToken);
+
+			headers["Authorization"] = `Bearer ${newToken}`;
+
+			resp = await fetch(url, { method, headers, body: options.body });
+		}
 		return resp;
 	}
 }

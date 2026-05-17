@@ -12,7 +12,7 @@ import {
 	input,
 	playerBlock,
 } from "./dom.js";
-import proxy from "./proxy.js";
+import proxy from "./apiProxy.js";
 
 export async function authorize(code) {
 	// const response = await fetch("http://127.0.0.1:5000/api/access", {
