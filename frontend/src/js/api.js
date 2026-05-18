@@ -15,13 +15,6 @@ import {
 import proxy from "./apiProxy.js";
 
 export async function authorize(code) {
-	// const response = await fetch("http://127.0.0.1:5000/api/access", {
-	// 	method: "POST",
-	// 	headers: {
-	// 		"Content-Type": "application/json",
-	// 	},
-	// 	body: JSON.stringify({ code }),
-	// });
 	const response = await proxy.request("http://127.0.0.1:5000/api/access", {
 		method: "POST",
 		body: JSON.stringify({ code }),
@@ -37,11 +30,7 @@ export async function authorize(code) {
 }
 
 export async function isTokenValid(token) {
-	const res = await fetch(`https://api.spotify.com/v1/me`, {
-		headers: {
-			Authorization: `Bearer ${token}`,
-		},
-	});
+	const res = await proxy.request(`https://api.spotify.com/v1/me`, {});
 
 	return res.status == 200;
 }
@@ -49,7 +38,7 @@ export async function isTokenValid(token) {
 export async function getRefreshToken() {
 	const refreshToken = localStorage.getItem("refresh_token");
 
-	const resp = await proxy.request("http://127.0.0.1:5000/api/access", {
+	const resp = await proxy.request("http://127.0.0.1:5000/api/refresh", {
 		method: "POST",
 		body: JSON.stringify({
 			refresh_token: refreshToken,
@@ -68,47 +57,26 @@ export async function getRefreshToken() {
 }
 
 export async function searchForType(query, type) {
-	const resp = await fetch(
+	const resp = await proxy.request(
 		`https://api.spotify.com/v1/search?q=${query}&type=${type}`,
-		{
-			headers: {
-				Authorization: `Bearer ${states.token}`,
-			},
-			method: "GET",
-		},
 	);
 
 	const data = await resp.json();
-
-	// if (resp.status == 401) {
-	// 	window.alert("You need to re-authorize");
-	// 	return;
-	// }
-
 	return data;
 }
 
 export async function playTrack(track) {
 	const uri = track.uri;
 
-	const resp = await fetch(
+	const resp = await proxy.request(
 		`https://api.spotify.com/v1/me/player/play?device_id=${states.deviceId}`,
 		{
-			headers: {
-				Authorization: `Bearer ${states.token}`,
-				"Content-Type": "application/json",
-			},
 			method: "PUT",
 			body: JSON.stringify({
 				uris: [uri],
 			}),
 		},
 	);
-
-	// if (resp.status == 401) {
-	// 	window.alert("You need to re-authorize");
-	// 	return;
-	// }
 
 	playerBlock.style.display = "flex";
 	trackName.hidden = false;
@@ -132,86 +100,53 @@ export async function playTrack(track) {
 }
 
 export async function loadSavedTracks() {
-	const resp = await fetch(`https://api.spotify.com/v1/me/tracks`, {
-		headers: {
-			Authorization: `Bearer ${states.token}`,
-		},
-		method: "GET",
-	});
+	const resp = await proxy.request(`https://api.spotify.com/v1/me/tracks`);
 
 	const savedSngs = await resp.json();
-
-	// if (resp.status == 401) {
-	// 	window.alert("You need to re-authorize");
-	// 	return;
-	// }
-
 	return savedSngs.items;
 }
 
 export async function saveTrack(track) {
 	const uris = `spotify:track:${track.id}`;
-	const resp = await fetch(
+	const resp = await proxy.request(
 		`https://api.spotify.com/v1/me/library?uris=${encodeURIComponent(uris)}`,
 		{
-			headers: {
-				Authorization: `Bearer ${states.token}`,
-				"Content-Type": "application/json",
-			},
 			method: "PUT",
 		},
 	);
-
-	// if (resp.status == 401) {
-	// 	window.alert("You need to re-authorize");
-	// 	return;
-	// }
 }
 
 export async function deleteSaved(track) {
 	const uris = `spotify:track:${track.id}`;
-	const resp = await fetch(
+	const resp = await proxy.request(
 		`https://api.spotify.com/v1/me/library?uris=${encodeURIComponent(uris)}`,
 		{
-			headers: {
-				Authorization: `Bearer ${states.token}`,
-			},
 			method: "DELETE",
 		},
 	);
-
-	// if (resp.status == 401) {
-	// 	window.alert("You need to re-authorize");
-	// 	return;
-	// }
 }
 
 export async function createPlaylist(name) {
-	const resp = await fetch(`https://api.spotify.com/v1/me/playlists`, {
-		headers: {
-			Authorization: `Bearer ${states.token}`,
-			"Content-Type": "application/json",
+	const resp = await proxy.request(
+		`https://api.spotify.com/v1/me/playlists`,
+		{
+			method: "POST",
+			body: JSON.stringify({
+				name: name,
+				description: "For friends",
+				public: false,
+			}),
 		},
-		method: "POST",
-		body: JSON.stringify({
-			name: name,
-			description: "For friends",
-			public: false,
-		}),
-	});
+	);
 
 	const data = await resp.json();
 	return data;
 }
 
 export async function addItemsToPlaylist(playlistId, uris) {
-	const resp = await fetch(
+	const resp = await proxy.request(
 		`https://api.spotify.com/v1/playlists/${playlistId}/items`,
 		{
-			headers: {
-				Authorization: `Bearer ${states.token}`,
-				"Content-Type": "application/json",
-			},
 			method: "POST",
 			body: JSON.stringify({ uris }),
 		},

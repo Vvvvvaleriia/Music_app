@@ -49,7 +49,6 @@ class ApiProxy {
 			const newToken = await getRefreshToken();
 
 			states.token = newToken;
-			token = newToken;
 			localStorage.setItem("access_token", newToken);
 
 			headers["Authorization"] = `Bearer ${newToken}`;

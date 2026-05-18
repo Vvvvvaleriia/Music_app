@@ -21,7 +21,7 @@ const server = http.createServer((req, resp) => {
 	}
 
 	if (req.method === "POST") {
-		if (req.url === "/api/access") {
+		if (req.url === "/api/refresh") {
 			let body = "";
 
 			req.on("data", (chunk) => {

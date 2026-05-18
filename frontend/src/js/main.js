@@ -6,6 +6,7 @@ import {
 	searchDate,
 	btnSearchListened,
 	exitBtn,
+	reloadBtn,
 } from "./dom.js";
 import { clientId, redirectUrl } from "./config.js";
 import { states } from "./state.js";

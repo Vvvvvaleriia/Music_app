@@ -325,7 +325,8 @@ body.app-mode {
 	justify-content: flex-end;
 }
 
-.exit-btn {
+.exit-btn,
+.reload-btn {
 	margin: 25px;
 	padding: 5px 10px;
 	cursor: pointer;

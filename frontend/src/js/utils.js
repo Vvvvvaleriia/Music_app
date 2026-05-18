@@ -8,6 +8,7 @@ import {
 	searchDate,
 	btnSearchListened,
 	exitBtn,
+	reloadBtn,
 } from "./dom.js";
 
 export function formatTime(ms) {
@@ -28,6 +29,7 @@ export async function visiblePanel() {
 	searchDate.hidden = false;
 	btnSearchListened.hidden = false;
 	exitBtn.hidden = false;
+	reloadBtn.hidden = false;
 }
 
 async function getPlaylistLink(playlistId) {
