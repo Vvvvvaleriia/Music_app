@@ -21,6 +21,48 @@ const server = http.createServer((req, resp) => {
 	}
 
 	if (req.method === "POST") {
+		if (req.url === "/api/access") {
+			let body = "";
+
+			req.on("data", (chunk) => {
+				body += chunk;
+			});
+
+			req.on("end", () => {
+				const data = JSON.parse(body);
+
+				fetch("https://accounts.spotify.com/api/token", {
+					method: "POST",
+					headers: {
+						Authorization:
+							"Basic " +
+							Buffer.from(clientId + ":" + clientSecret).toString(
+								"base64",
+							),
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					body: new URLSearchParams({
+						code: data.code,
+						redirect_uri: redirectUrl,
+						grant_type: "authorization_code",
+					}),
+				})
+					.then((resp) => resp.json())
+					.then((data) => {
+						resp.writeHead(200, {
+							"Content-Type": "application/json",
+						});
+						return resp.end(
+							JSON.stringify({
+								token: data.access_token,
+								refreshToken: data.refresh_token,
+							}),
+						);
+					});
+			});
+			return;
+		}
+
 		if (req.url === "/api/refresh") {
 			let body = "";
 
@@ -31,71 +73,39 @@ const server = http.createServer((req, resp) => {
 			req.on("end", () => {
 				const data = JSON.parse(body);
 
-				if (data.code) {
-					fetch("https://accounts.spotify.com/api/token", {
-						method: "POST",
-						headers: {
-							Authorization:
-								"Basic " +
-								Buffer.from(
-									clientId + ":" + clientSecret,
-								).toString("base64"),
-							"Content-Type": "application/x-www-form-urlencoded",
-						},
-						body: new URLSearchParams({
-							code: data.code,
-							redirect_uri: redirectUrl,
-							grant_type: "authorization_code",
-						}),
-					})
-						.then((resp) => resp.json())
-						.then((data) => {
-							resp.writeHead(200, {
-								"Content-Type": "application/json",
-							});
-							return resp.end(
-								JSON.stringify({
-									token: data.access_token,
-									refreshToken: data.refresh_token,
-								}),
-							);
+				fetch("https://accounts.spotify.com/api/token", {
+					method: "POST",
+					headers: {
+						Authorization:
+							"Basic " +
+							Buffer.from(clientId + ":" + clientSecret).toString(
+								"base64",
+							),
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					body: new URLSearchParams({
+						refresh_token: data.refresh_token,
+						grant_type: "refresh_token",
+					}),
+				})
+					.then((resp) => resp.json())
+					.then((data) => {
+						resp.writeHead(200, {
+							"Content-Type": "application/json",
 						});
-				} else if (data.refresh_token) {
-					fetch("https://accounts.spotify.com/api/token", {
-						method: "POST",
-						headers: {
-							Authorization:
-								"Basic " +
-								Buffer.from(
-									clientId + ":" + clientSecret,
-								).toString("base64"),
-							"Content-Type": "application/x-www-form-urlencoded",
-						},
-						body: new URLSearchParams({
-							refresh_token: data.refresh_token,
-							grant_type: "refresh_token",
-						}),
-					})
-						.then((resp) => resp.json())
-						.then((data) => {
-							resp.writeHead(200, {
-								"Content-Type": "application/json",
-							});
 
-							return resp.end(
-								JSON.stringify({
-									token: data.access_token,
-									refreshToken: data.refresh_token,
-								}),
-							);
-						});
-				}
+						return resp.end(
+							JSON.stringify({
+								token: data.access_token,
+								//refreshToken: data.refresh_token,
+							}),
+						);
+					});
 			});
 
 			return;
 		}
 	}
-
 	resp.writeHead(404);
 	resp.end("Not Found");
 });

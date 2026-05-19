@@ -36,22 +36,23 @@ export async function isTokenValid(token) {
 }
 
 export async function getRefreshToken() {
-	const refreshToken = localStorage.getItem("refresh_token");
+	const refresh_token = localStorage.getItem("refresh_token");
 
-	const resp = await proxy.request("http://127.0.0.1:5000/api/refresh", {
+	const resp = await fetch("http://127.0.0.1:5000/api/refresh", {
 		method: "POST",
-		body: JSON.stringify({
-			refresh_token: refreshToken,
-		}),
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({ refresh_token }),
 	});
 
 	const data = await resp.json();
 
-	localStorage.setItem("access_token", data.token);
+	// localStorage.setItem("access_token", data.token);
 
-	if (data.refreshToken) {
-		localStorage.setItem("refresh_token", data.refreshToken);
-	}
+	// if (data.refreshToken) {
+	// 	localStorage.setItem("refresh_token", data.refreshToken);
+	// }
 
 	return data.token;
 }

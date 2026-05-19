@@ -71,6 +71,15 @@ btnSearchListened.onclick = function () {
 	return listened;
 };
 
+reloadBtn.onclick = async function () {
+	const newToken = await getRefreshToken();
+
+	states.token = newToken;
+	localStorage.setItem("access_token", newToken);
+
+	startApp();
+};
+
 exitBtn.onclick = function logout() {
 	localStorage.removeItem("access_token");
 	states.token = null;
@@ -87,14 +96,8 @@ async function startApp() {
 			states.token = savedToken;
 			events.emit("pageLoaded");
 		} else {
-			try {
-				const newToken = await getRefreshToken();
-				states.token = newToken;
-				events.emit("pageLoaded");
-			} catch {
-				localStorage.removeItem("access_token");
-				localStorage.removeItem("refresh_token");
-			}
+			localStorage.removeItem("access_token");
+			states.token = null;
 		}
 	} else {
 		if (code) {
