@@ -48,19 +48,19 @@ async function createPlaylistHistory(tracks, date) {
 }
 
 export async function buttonDownload(container, tracks, date) {
-	const oldBtn = document.querySelector(".download-btn");
+	const oldBtn = document.querySelector(".share-btn");
 	if (oldBtn) oldBtn.remove();
 
-	const download = document.createElement("button");
-	download.className = "download-btn";
-	download.textContent = "download";
+	const share = document.createElement("button");
+	share.className = "share-btn";
+	share.textContent = "share";
 
-	download.addEventListener("click", async () => {
+	share.addEventListener("click", async () => {
 		const link = await createPlaylistHistory(tracks, date);
 
 		await navigator.clipboard.writeText(link);
 		alert("Link copied!");
 	});
 
-	container.appendChild(download);
+	container.appendChild(share);
 }
