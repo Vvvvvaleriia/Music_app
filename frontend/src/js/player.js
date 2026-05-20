@@ -40,6 +40,8 @@ export async function initSpotifyPlayer() {
 		volumePrs.innerText = `Volume: ${Math.round(state * 100)}%`;
 	});
 
+	let autoPlayPending = false;
+
 	player.addListener("player_state_changed", (state) => {
 		const {
 			position,
@@ -53,6 +55,7 @@ export async function initSpotifyPlayer() {
 
 		if (!states.isActive && !state.paused) {
 			states.isActive = true;
+			autoPlayPending = false;
 			states.idInterval = setInterval(() => {
 				states.current += 1000;
 				currentTime.textContent = formatTime(states.current);
@@ -63,7 +66,7 @@ export async function initSpotifyPlayer() {
 			states.isActive = false;
 		}
 
-		if (state.paused && state.position === 0) {
+		if (state.paused && state.position === 0 && !autoPlayPending) {
 			clearInterval(states.idInterval);
 			states.isActive = false;
 			states.current = 0;
@@ -71,6 +74,7 @@ export async function initSpotifyPlayer() {
 
 			const next = trackQueue.dequeue("oldest");
 			if (next) {
+				autoPlayPending = true;
 				events.emit("playTrack", next);
 				events.emit("queueUpdated");
 			}

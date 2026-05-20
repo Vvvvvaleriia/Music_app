@@ -62,8 +62,8 @@ function memoize(fn) {
 
 const renderTracks = memoize((item) => {
 	return `<li class="saved-items">
-	<span class="track-label>${item.track.artists[0].name} - ${item.track.name}</span>
-	<div class="track-buttons>
+	<span class="track-label">${item.track.artists[0].name} - ${item.track.name}</span>
+	<div class="track-buttons">
 		<button class="play-saved">play</button> 
 		<button class="delete-saved">delete</button>
 		<button class="queue-add-btn">Add to queue</button>
