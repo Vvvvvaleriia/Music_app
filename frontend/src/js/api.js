@@ -88,7 +88,7 @@ export async function playTrack(track) {
 	durationTime.hidden = false;
 	input.hidden = false;
 
-	//toggleBtn.textContent = "pause";
+	toggleBtn.textContent = "pause";
 
 	trackName.innerText = track.name;
 	trackArtist.innerHTML = track.artists[0].name;

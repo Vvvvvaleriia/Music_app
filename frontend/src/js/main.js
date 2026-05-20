@@ -6,6 +6,7 @@ import {
 	searchDate,
 	btnSearchListened,
 	exitBtn,
+	queueList,
 } from "./dom.js";
 import { clientId, redirectUrl } from "./config.js";
 import { states } from "./state.js";
@@ -24,6 +25,7 @@ import {
 	loggedSaveTrack,
 	loggedAuthorize,
 } from "./logging.js";
+import { trackQueue } from "./queue.js";
 
 events.on("pageLoaded", loggedRender);
 events.on("pageLoaded", visiblePanel);
@@ -33,6 +35,42 @@ events.on("savedTrack", loggedSaveTrack);
 events.on("savedTrack", loggedRender);
 events.on("deleteTrack", loggedDeleteTrack);
 events.on("deleteTrack", loggedRender);
+
+function renderQueue() {
+	queueList.innerHTML = "";
+	const tracks = trackQueue.all();
+
+	if (tracks.length === 0) {
+		const empty = document.createElement("li");
+		empty.className = "queue-empty";
+		empty.textContent = "Queue is empty";
+		queueList.appendChild(empty);
+		return;
+	}
+
+	tracks.forEach(({ track, priority }, idx) => {
+		const li = document.createElement("li");
+		li.className = "queue-item";
+		li.innerHTML = `
+			<span class="track-label">${track.artists[0].name} - ${track.name}</span>
+			<span class="queue-position">#${idx + 1} ★${priority}</span>
+		`;
+		queueList.appendChild(li);
+	});
+}
+
+events.on("queueUpdated", renderQueue);
+
+document.querySelectorAll(".queue-btn").forEach((btn) => {
+	btn.addEventListener("click", () => {
+		const strategy = btn.dataset.strategy;
+		const track = trackQueue.dequeue(strategy);
+		if (track) {
+			events.emit("playTrack", track);
+			events.emit("queueUpdated");
+		}
+	});
+});
 
 events.on("search", async (textInput) => {
 	const result = await loggedSearch(textInput, "track");

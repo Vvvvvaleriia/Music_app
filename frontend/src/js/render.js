@@ -4,14 +4,17 @@ import { savePlayedTrack } from "./history.js";
 import { events } from "./emitter.js";
 import { loadSavedTracks } from "./api.js";
 import { loggedLoadSaved } from "./logging.js";
+import { trackQueue } from "./queue.js";
 
 export function createTrackElement(track) {
 	const li = document.createElement("li");
 
 	li.innerHTML = `
-		${track.name} - ${track.artists[0].name}
-		<button class="play-btn">play</button>
-		<button class="save-btn">save</button>
+		<span class="track-label">${track.artists[0].name} - ${track.name}</span>
+		<div class="track-buttons">
+			<button class="play-btn">play</button>
+			<button class="save-btn">save</button>
+		</div>
 	`;
 
 	const btnPlay = li.querySelector(".play-btn");
@@ -20,6 +23,7 @@ export function createTrackElement(track) {
 	btnPlay.addEventListener("click", () => {
 		events.emit("playTrack", track);
 	});
+
 	btnSave.onclick = function () {
 		events.emit("savedTrack", track);
 	};
@@ -57,9 +61,12 @@ function memoize(fn) {
 
 const renderTracks = memoize((item) => {
 	return `<li class="saved-items">
-	<span music-saved>${item.track.name} - ${item.track.artists[0].name}</span> 
-	<button class="play-saved">play</button> 
-	<button class="delete-saved">delete</button>
+	<span class="track-label>${item.track.artists[0].name} - ${item.track.name}</span>
+	<div class="track-buttons>
+		<button class="play-saved">play</button> 
+		<button class="delete-saved">delete</button>
+		<button class="queue-add-btn">Add to queue</button>
+	</div>
 	</li>`;
 });
 
@@ -68,11 +75,29 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 		let batch = [];
 
 		for await (const data of asyncIterator) {
-			const el = document.createElement("div");
-			el.innerHTML = data.html;
+			const temp = document.createElement("ul");
+			temp.innerHTML = data.html;
+			const el = temp.firstElementChild;
 
 			el.querySelector(".play-saved").addEventListener("click", () => {
 				events.emit("playTrack", data.item.track);
+			});
+
+			el.querySelector(".queue-add-btn").addEventListener("click", () => {
+				const history = JSON.parse(
+					localStorage.getItem("listenedHistory") || "{}",
+				);
+				const id = data.item.track.id;
+				let totalPlays = 0;
+				for (const tracks of Object.values(history)) {
+					const entry = tracks.find((t) => t.id === id);
+					if (entry) {
+						totalPlays += entry.playCount || 1;
+					}
+				}
+				const priority = totalPlays;
+				trackQueue.enqueue(data.item.track, priority);
+				events.emit("queueUpdated");
 			});
 
 			el.querySelector(".delete-saved").onclick = function () {

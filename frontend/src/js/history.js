@@ -5,27 +5,34 @@ import { loggedButtonDownload } from "./logging.js";
 export function savePlayedTrack(track) {
 	const date = new Date().toISOString().split("T")[0];
 
-	const listOfPlayed =
-		JSON.parse(localStorage.getItem("listenedHistory")) || {};
+	let listOfPlayed = {};
+	try {
+		listOfPlayed =
+			JSON.parse(localStorage.getItem("listenedHistory")) || {};
+	} catch {
+		listOfPlayed = {};
+	}
 
 	if (!listOfPlayed[date]) {
 		listOfPlayed[date] = [];
 	}
 
-	const alreadyExists = listOfPlayed[date].some(
-		(song) => song.id === track.id,
-	);
+	const existing = listOfPlayed[date].find((song) => song.id === track.id);
 
-	if (!alreadyExists) {
-		listOfPlayed[date].push(track);
+	if (existing) {
+		existing.playCount = (existing.playCount || 1) + 1;
+	} else {
+		listOfPlayed[date].push({ ...track, playCount: 1 });
 	}
 	localStorage.setItem("listenedHistory", JSON.stringify(listOfPlayed));
 }
 
 function renderListened(item) {
 	return `<li class="history-tracks">
-	<span>${item.name} - ${item.artists[0].name}</span> 
-	<button class="play-listened">play</button> 
+	<span class="track-label">${item.artists[0].name} - ${item.name}</span> 
+	<div class="track-buttons>
+		<button class="play-listened">play</button> 
+	</div>
 	</li>`;
 }
 
@@ -34,8 +41,9 @@ function htmlGenerator(asyncIterator, batchSize = 1) {
 		let batch = [];
 
 		for await (const data of asyncIterator) {
-			const el = document.createElement("div");
-			el.innerHTML = data.html;
+			const temp = document.createElement("ul");
+			temp.innerHTML = data.html;
+			const el = temp.firstElementChild;
 
 			el.querySelector(".play-listened").addEventListener("click", () => {
 				events.emit("playTrack", data.item);
@@ -56,15 +64,17 @@ function htmlGenerator(asyncIterator, batchSize = 1) {
 
 export async function renderHistory(date) {
 	const historyList = document.querySelector(".render-listened");
-	const listened = JSON.parse(localStorage.getItem("listenedHistory"));
-
-	historyList.innerHTML = "";
+	let listened = {};
+	try {
+		listened = JSON.parse(localStorage.getItem("listenedHistory"));
+	} catch {
+		listened = {};
+	}
 
 	date = date.trim();
 
-	const tracks = listened[date];
-
-	if (!listened[date]) {
+	if (!listened || !listened[date]) {
+		historyList.innerHTML = "";
 		const notice = document.createElement("p");
 		notice.textContent = "You didn't listen tracks on this date";
 
@@ -72,18 +82,15 @@ export async function renderHistory(date) {
 		return;
 	}
 
-	if (!tracks) {
-		return;
-	} else {
-		const streamHistory = streamArray(tracks);
-		const mappedHistory = asyncMap(streamHistory, async (item) => ({
-			html: renderListened(item),
-			item,
-		}));
+	const tracks = listened[date];
+	const streamHistory = streamArray(tracks);
+	const mappedHistory = asyncMap(streamHistory, async (item) => ({
+		html: renderListened(item),
+		item,
+	}));
 
-		const generator = htmlGenerator(mappedHistory);
-		await incrementalRender(historyList, generator());
+	const generator = htmlGenerator(mappedHistory);
+	await incrementalRender(historyList, generator());
 
-		loggedButtonDownload(historyList, tracks, date);
-	}
+	loggedButtonDownload(historyList, tracks, date);
 }

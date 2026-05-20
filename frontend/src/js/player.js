@@ -13,6 +13,8 @@ import {
 } from "./dom.js";
 import { states } from "./state.js";
 import { formatTime } from "./utils.js";
+import { trackQueue } from "./queue.js";
+import { events } from "./emitter.js";
 
 export async function initSpotifyPlayer() {
 	const player = new Spotify.Player({
@@ -54,6 +56,7 @@ export async function initSpotifyPlayer() {
 			states.idInterval = setInterval(() => {
 				states.current += 1000;
 				currentTime.textContent = formatTime(states.current);
+				input.value = Math.floor(states.current / 1000);
 			}, 1000);
 		} else if (states.isActive && state.paused) {
 			clearInterval(states.idInterval);
@@ -65,6 +68,12 @@ export async function initSpotifyPlayer() {
 			states.isActive = false;
 			states.current = 0;
 			currentTime.textContent = formatTime(states.current);
+
+			const next = trackQueue.dequeue("oldest");
+			if (next) {
+				events.emit("playTrack", next);
+				events.emit("queueUpdated");
+			}
 			return;
 		}
 

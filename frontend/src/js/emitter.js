@@ -16,6 +16,7 @@ class EventEmitter {
 	}
 
 	async emit(event, data) {
+		if (!this.events[event]) return;
 		for (const listener of this.events[event]) {
 			await listener(data);
 		}
