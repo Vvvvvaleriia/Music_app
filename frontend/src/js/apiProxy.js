@@ -25,9 +25,7 @@ class ApiProxy {
 	async request(url, options = {}) {
 		if (this.#checkRateLimit()) {
 			console.warn("Rate limit error");
-			await new Promise((r) =>
-				setTimeout(r, this.#checkRateLimit.windowMs),
-			);
+			await new Promise((r) => setTimeout(r, this.#rateLimit.windowMs));
 			return this.request(url, options);
 		}
 		const method = options.method || "GET";

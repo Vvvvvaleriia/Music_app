@@ -30,9 +30,13 @@ export async function authorize(code) {
 }
 
 export async function isTokenValid(token) {
-	const res = await proxy.request(`https://api.spotify.com/v1/me`, {});
+	const res = await fetch(`https://api.spotify.com/v1/me`, {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	});
 
-	return res.status == 200;
+	return res.status === 200;
 }
 
 export async function getRefreshToken() {
@@ -47,13 +51,6 @@ export async function getRefreshToken() {
 	});
 
 	const data = await resp.json();
-
-	// localStorage.setItem("access_token", data.token);
-
-	// if (data.refreshToken) {
-	// 	localStorage.setItem("refresh_token", data.refreshToken);
-	// }
-
 	return data.token;
 }
 
@@ -91,7 +88,7 @@ export async function playTrack(track) {
 	durationTime.hidden = false;
 	input.hidden = false;
 
-	toggleBtn.textContent = "pause";
+	//toggleBtn.textContent = "pause";
 
 	trackName.innerText = track.name;
 	trackArtist.innerHTML = track.artists[0].name;

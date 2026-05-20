@@ -6,7 +6,6 @@ import {
 	searchDate,
 	btnSearchListened,
 	exitBtn,
-	reloadBtn,
 } from "./dom.js";
 import { clientId, redirectUrl } from "./config.js";
 import { states } from "./state.js";
@@ -71,24 +70,15 @@ btnSearchListened.onclick = function () {
 	return listened;
 };
 
-reloadBtn.onclick = async function () {
-	const newToken = await getRefreshToken();
-
-	states.token = newToken;
-	localStorage.setItem("access_token", newToken);
-
-	startApp();
-};
-
 exitBtn.onclick = function logout() {
 	localStorage.removeItem("access_token");
 	states.token = null;
-	window.location.href = "http://localhost:3000/";
+	window.location.href = "http://127.0.0.1:3000/";
 };
 
 async function startApp() {
 	const savedToken = localStorage.getItem("access_token");
-	const code = window.location.search.replace("?code=", "");
+	const code = new URLSearchParams(window.location.search).get("code");
 
 	if (savedToken) {
 		const valid = await isTokenValid(savedToken);
@@ -96,16 +86,30 @@ async function startApp() {
 			states.token = savedToken;
 			events.emit("pageLoaded");
 		} else {
-			localStorage.removeItem("access_token");
-			states.token = null;
+			const newToken = await getRefreshToken();
+
+			if (newToken) {
+				states.token = newToken;
+				localStorage.setItem("access_token", newToken);
+				events.emit("pageLoaded");
+			} else {
+				localStorage.removeItem("access_token");
+				localStorage.removeItem("refresh_token");
+				states.token = null;
+				//showLoginScreen();
+			}
 		}
 	} else {
 		if (code) {
 			states.token = await loggedAuthorize(code);
 			localStorage.setItem("access_token", states.token);
 
+			window.history.replaceState({}, "", window.location.pathname);
+
 			events.emit("pageLoaded");
-		}
+		} //else {
+		//showLoginScreen();
+		//}
 	}
 
 	appReady = true;

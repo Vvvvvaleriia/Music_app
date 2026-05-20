@@ -1,6 +1,5 @@
 import { streamArray, asyncMap, incrementalRender } from "./render.js";
 import { events } from "./emitter.js";
-import { buttonDownload } from "./utils.js";
 import { loggedButtonDownload } from "./logging.js";
 
 export function savePlayedTrack(track) {
