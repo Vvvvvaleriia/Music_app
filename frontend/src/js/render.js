@@ -5,6 +5,7 @@ import { events } from "./emitter.js";
 import { loadSavedTracks } from "./api.js";
 import { loggedLoadSaved } from "./logging.js";
 import { trackQueue } from "./queue.js";
+import { withSpinner } from "./utils.js";
 
 export function createTrackElement(track) {
 	const li = document.createElement("li");
@@ -83,7 +84,7 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 				events.emit("playTrack", data.item.track);
 			});
 
-			el.querySelector(".queue-add-btn").addEventListener("click", () => {
+			el.querySelector(".queue-add-btn").onclick = function () {
 				const history = JSON.parse(
 					localStorage.getItem("listenedHistory") || "{}",
 				);
@@ -98,7 +99,7 @@ function htmlGenerator(asyncIterator, batchSize = 4) {
 				const priority = totalPlays;
 				trackQueue.enqueue(data.item.track, priority);
 				events.emit("queueUpdated");
-			});
+			};
 
 			el.querySelector(".delete-saved").onclick = function () {
 				events.emit("deleteTrack", data.item.track);
@@ -126,17 +127,17 @@ export async function incrementalRender(container, iterator) {
 export async function render() {
 	const tracksDiv = document.querySelector(".tracks");
 
-	tracksDiv.innerHTML = "";
+	await withSpinner(tracksDiv, async () => {
+		const tracks = await loggedLoadSaved();
 
-	const tracks = await loggedLoadSaved();
-
-	if (tracks) {
-		const streamTracks = streamArray(tracks);
-		const mappedTracks = asyncMap(streamTracks, async (item) => ({
-			html: renderTracks(item),
-			item,
-		}));
-		const generator = htmlGenerator(mappedTracks);
-		await incrementalRender(tracksDiv, generator());
-	}
+		if (tracks) {
+			const streamTracks = streamArray(tracks);
+			const mappedTracks = asyncMap(streamTracks, async (item) => ({
+				html: renderTracks(item),
+				item,
+			}));
+			const generator = htmlGenerator(mappedTracks);
+			await incrementalRender(tracksDiv, generator());
+		}
+	});
 }

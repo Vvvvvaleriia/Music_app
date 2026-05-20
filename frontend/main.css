@@ -72,20 +72,28 @@ body.app-mode {
 	box-shadow: 0 5px 15px rgba(255, 183, 165, 0.5);
 }
 
-.header-control,
-.main-content {
-	display: flex;
-	gap: 15px;
-	padding: 15px 20px;
+.header-control {
+	display: grid;
+	grid-template-columns: 470px 470px;
+	gap: 20px;
+	padding: 20px 40px;
 }
 
 .search,
-.tracks {
+.history-container,
+.tracks,
+.queue-container {
 	background: white;
 	padding: 15px;
 	border-radius: 16px;
 	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-	margin: 15px;
+	width: 470px;
+	height: 320px;
+	flex-shrink: 0;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 }
 
 .name-inp {
@@ -129,14 +137,6 @@ body.app-mode {
 	transform: translateY(-1px);
 }
 
-.history-container {
-	background: white;
-	padding: 15px;
-	border-radius: 16px;
-	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-	margin: 15px;
-}
-
 .search-date {
 	width: 100%;
 	padding: 12px 14px;
@@ -176,6 +176,143 @@ body.app-mode {
 .btn-seachDate:hover {
 	background: #34344f;
 	transform: translateY(-1px);
+}
+
+.list-song,
+.tracks,
+.render-listened,
+.queue-list {
+	list-style: none;
+}
+
+.queue-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+	flex-shrink: 0;
+}
+
+.queue-title {
+	font-weight: 700;
+	font-size: 14px;
+	color: #1e1e2f;
+}
+
+.queue-controls {
+	display: flex;
+	gap: 4px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+.queue-btn {
+	padding: 3px 7px;
+	font-size: 11px;
+	border: 1px solid #1e1e2f;
+	border-radius: 8px;
+	background: white;
+	color: #1e1e2f;
+	cursor: pointer;
+	transition: 0.2s;
+}
+
+.queue-btn:hover {
+	background: #1e1e2f;
+	color: white;
+}
+
+.queue-list {
+	overflow-y: auto;
+	flex: 1;
+}
+
+.queue-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 4px;
+	border-bottom: 1px solid #f0f0f0;
+	font-size: 13px;
+}
+
+.queue-item:last-child {
+	border-bottom: none;
+}
+
+.queue-position {
+	font-size: 11px;
+	color: #aaa;
+	flex-shrink: 0;
+	margin-left: 8px;
+}
+
+.queue-empty {
+	color: #aaa;
+	font-size: 13px;
+	text-align: center;
+	padding: 20px 0;
+}
+
+.queue-add-btn {
+	height: 20px;
+	padding: 0 6px;
+	border: none;
+	border-radius: 4px;
+	background: #e8e8f0;
+	color: #1e1e2f;
+	cursor: pointer;
+	font-size: 11px;
+	transition: 0.2s;
+}
+
+.queue-add-btn:hover {
+	background: #1e1e2f;
+	color: white;
+}
+
+.list-song {
+	margin-top: 10px;
+	overflow-y: auto;
+	flex: 1;
+}
+
+.render-listened,
+.tracks {
+	overflow-y: auto;
+	flex: 1;
+}
+
+.list-song li,
+.saved-items,
+.history-tracks {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 4px;
+	border-bottom: 1px solid #f0f0f0;
+	gap: 10px;
+}
+
+.list-song li:last-child,
+.saved-items:last-child,
+.history-tracks:last-child {
+	border-bottom: none;
+}
+
+.track-label {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 14px;
+}
+
+.track-buttons {
+	display: flex;
+	gap: 6px;
+	flex-shrink: 0;
 }
 
 .play-btn,
@@ -323,6 +460,14 @@ body.app-mode {
 .exit-btn-wrapper {
 	display: flex;
 	justify-content: flex-end;
+	align-items: center;
+}
+
+.user-email {
+	margin-right: 8px;
+	font-size: 13px;
+	color: #4a3e3e;
+	opacity: 0.7;
 }
 
 .exit-btn {
@@ -337,14 +482,77 @@ body.app-mode {
 }
 
 .share-btn {
-	width: 50px;
-	height: 20px;
+	width: 80px;
+	height: 30px;
+	margin-top: 12px;
 	cursor: pointer;
 	border-radius: 12px;
 	background: #1e1e2f;
 	color: white;
 	transition: 0.2s;
 	border: none;
+	font-size: 14px;
+}
+
+.toast {
+	position: fixed;
+	top: 30px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: #1e1e2f;
+	color: white;
+	padding: 14px 24px;
+	border-radius: 14px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+	font-size: 14px;
+	z-index: 9999;
+	opacity: 1;
+	transition: opacity 0.4s ease;
+	text-align: center;
+	min-width: 220px;
+}
+
+.toast.hide {
+	opacity: 0;
+}
+
+.mini-spinner {
+	width: 20px;
+	height: 20px;
+	border: 3px solid #f0f0f0;
+	border-top-color: #1e1e2f;
+	border-radius: 50%;
+	animation: spin 0.7s linear infinite;
+	margin: 12px auto;
+}
+
+.loader-screen {
+	position: fixed;
+	inset: 0;
+	background: linear-gradient(135deg, #fff5f2 0%, #ffffff 100%);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 9999;
+}
+
+.loader-screen.hidden {
+	display: none;
+}
+
+.spinner {
+	width: 48px;
+	height: 48px;
+	border: 5px solid #ffd1c1;
+	border-top-color: #ffb7a5;
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .exit-btn:hover,

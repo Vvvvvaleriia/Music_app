@@ -1,4 +1,4 @@
-import { addItemsToPlaylist, createPlaylist } from "./api.js";
+import { addItemsToPlaylist, createPlaylist, getUserEmail } from "./api.js";
 import {
 	btnLogin,
 	welcomeText,
@@ -8,7 +8,28 @@ import {
 	searchDate,
 	btnSearchListened,
 	exitBtn,
+	userEmail,
 } from "./dom.js";
+
+function showToast(message) {
+	const toast = document.createElement("div");
+	toast.className = "toast";
+	toast.textContent = message;
+	document.body.appendChild(toast);
+
+	setTimeout(() => {
+		toast.classList.add("hide");
+		toast.addEventListener("transitionend", () => toast.remove());
+	}, 3000);
+}
+
+export function withSpinner(container, asyncFn) {
+	const spinner = document.createElement("div");
+	spinner.className = "mini-spinner";
+	container.innerHTML = "";
+	container.appendChild(spinner);
+	return asyncFn().finally(() => spinner.remove());
+}
 
 export function formatTime(ms) {
 	const totalSeconds = Math.floor(ms / 1000);
@@ -19,7 +40,9 @@ export function formatTime(ms) {
 }
 
 export async function visiblePanel() {
+	document.querySelector(".loader-screen")?.classList.add("hidden");
 	document.querySelector(".login-page")?.remove();
+	document.querySelector(".app-mode").hidden = false;
 	btnLogin.hidden = true;
 	welcomeText.hidden = true;
 	inputSrch.hidden = false;
@@ -28,9 +51,16 @@ export async function visiblePanel() {
 	searchDate.hidden = false;
 	btnSearchListened.hidden = false;
 	exitBtn.hidden = false;
+
+	const email = await getUserEmail();
+	if (email) {
+		userEmail.textContent = email;
+		userEmail.hidden = false;
+	}
 }
 
 export function showLoginScreen() {
+	document.querySelector(".loader-screen")?.classList.add("hidden");
 	document.querySelector(".login-page").hidden = false;
 }
 
@@ -58,11 +88,14 @@ export async function buttonDownload(container, tracks, date) {
 	share.textContent = "share";
 
 	share.addEventListener("click", async () => {
-		const link = await createPlaylistHistory(tracks, date);
-
-		await navigator.clipboard.writeText(link);
-		alert("Link copied!");
+		try {
+			const link = await createPlaylistHistory(tracks, date);
+			await navigator.clipboard.writeText(link);
+			showToast("Link copied! Playlist created in Spotify");
+		} catch {
+			showToast("Failed to create playlist. Try again.");
+		}
 	});
 
-	container.appendChild(share);
+	container.parentElement.appendChild(share);
 }

@@ -21,3 +21,4 @@ export const btnSearchListened = document.querySelector(".btn-seachDate");
 export const exitBtn = document.querySelector(".exit-btn");
 export const queueList = document.querySelector(".queue-list");
 export const queueContainer = document.querySelector(".queue-container");
+export const userEmail = document.querySelector(".queue-container");

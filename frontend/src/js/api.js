@@ -39,6 +39,13 @@ export async function isTokenValid(token) {
 	return res.status === 200;
 }
 
+export async function getUserEmail() {
+	const res = await proxy.request(`https://api.spotify.com/v1/me`);
+
+	const data = await res.json();
+	return data.email;
+}
+
 export async function getRefreshToken() {
 	const refresh_token = localStorage.getItem("refresh_token");
 

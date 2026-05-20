@@ -7,14 +7,18 @@
 		<title>Document</title>
 	</head>
 	<body class="login-mode">
-		<div class="login-page">
+		<div class="loader-screen">
+			<div class="spinner"></div>
+		</div>
+		<div class="login-page" hidden>
 			<h1 class="welcome">Login before start</h1>
 			<button id="login" class="btnToLogin">login</button>
 		</div>
 		<div class="exit-btn-wrapper">
+			<span class="user-email" hidden></span>
 			<button class="exit-btn" hidden>Exit</button>
 		</div>
-		<div class="app-mode">
+		<div class="app-mode" hidden>
 			<div class="header-control">
 				<div class="search">
 					<input
@@ -37,11 +41,7 @@
 					<button class="btn-seachDate" hidden>Search</button>
 					<ul class="render-listened"></ul>
 				</div>
-			</div>
-			<div class="main-content">
-				<div id="save-track" class="save-track" hidden>
-					Saved tracks
-				</div>
+
 				<div class="tracks"></div>
 
 				<div class="queue-container">

@@ -33,13 +33,9 @@ function writeLog(data) {
 	if (data.phase === "error") {
 		console.error(message);
 		console.groupEnd();
-	} else if (data.phase == "call") {
+	} else if (data.phase === "call") {
 		console.group(`${data.fnName}()`);
-		if (data.level === "INFO") {
-			console.info(message);
-		} else {
-			console.info(message);
-		}
+		console.info(message);
 	} else if (data.phase === "result") {
 		console.log(message);
 		console.groupEnd();
@@ -49,7 +45,7 @@ function writeLog(data) {
 export function log(level) {
 	function decorator(fn) {
 		let fnName = "anonymous";
-		const isAsync = fn.constructor.name == "AsyncFunction";
+		const isAsync = fn.constructor.name === "AsyncFunction";
 
 		if (fn.name) {
 			fnName = fn.name;

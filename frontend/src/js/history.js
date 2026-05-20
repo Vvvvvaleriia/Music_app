@@ -1,6 +1,7 @@
 import { streamArray, asyncMap, incrementalRender } from "./render.js";
 import { events } from "./emitter.js";
 import { loggedButtonDownload } from "./logging.js";
+import { withSpinner } from "./utils.js";
 
 export function savePlayedTrack(track) {
 	const date = new Date().toISOString().split("T")[0];
@@ -30,7 +31,7 @@ export function savePlayedTrack(track) {
 function renderListened(item) {
 	return `<li class="history-tracks">
 	<span class="track-label">${item.artists[0].name} - ${item.name}</span> 
-	<div class="track-buttons>
+	<div class="track-buttons">
 		<button class="play-listened">play</button> 
 	</div>
 	</li>`;
@@ -66,7 +67,7 @@ export async function renderHistory(date) {
 	const historyList = document.querySelector(".render-listened");
 	let listened = {};
 	try {
-		listened = JSON.parse(localStorage.getItem("listenedHistory"));
+		listened = JSON.parse(localStorage.getItem("listenedHistory")) || {};
 	} catch {
 		listened = {};
 	}
@@ -82,15 +83,17 @@ export async function renderHistory(date) {
 		return;
 	}
 
-	const tracks = listened[date];
-	const streamHistory = streamArray(tracks);
-	const mappedHistory = asyncMap(streamHistory, async (item) => ({
-		html: renderListened(item),
-		item,
-	}));
+	await withSpinner(historyList, async () => {
+		const tracks = listened[date];
+		const streamHistory = streamArray(tracks);
+		const mappedHistory = asyncMap(streamHistory, async (item) => ({
+			html: renderListened(item),
+			item,
+		}));
 
-	const generator = htmlGenerator(mappedHistory);
-	await incrementalRender(historyList, generator());
+		const generator = htmlGenerator(mappedHistory);
+		await incrementalRender(historyList, generator());
 
-	loggedButtonDownload(historyList, tracks, date);
+		loggedButtonDownload(historyList, tracks, date);
+	});
 }

@@ -15,7 +15,7 @@ import { initSpotifyPlayer } from "./player.js";
 import { createTrackElement, render } from "./render.js";
 import { renderHistory, savePlayedTrack } from "./history.js";
 import { events } from "./emitter.js";
-import { visiblePanel } from "./utils.js";
+import { visiblePanel, withSpinner, showLoginScreen } from "./utils.js";
 import {
 	loggedSearch,
 	loggedDeleteTrack,
@@ -73,10 +73,12 @@ document.querySelectorAll(".queue-btn").forEach((btn) => {
 });
 
 events.on("search", async (textInput) => {
-	const result = await loggedSearch(textInput, "track");
-	const tracks = result.tracks.items;
+	await withSpinner(songsList, async () => {
+		const result = await loggedSearch(textInput, "track");
+		const tracks = result.tracks.items;
 
-	events.emit("showTrack", tracks);
+		events.emit("showTrack", tracks);
+	});
 });
 events.on("showTrack", (tracks) => {
 	songsList.innerHTML = "";
@@ -134,7 +136,7 @@ async function startApp() {
 				localStorage.removeItem("access_token");
 				localStorage.removeItem("refresh_token");
 				states.token = null;
-				//showLoginScreen();
+				showLoginScreen();
 			}
 		}
 	} else {
@@ -145,9 +147,9 @@ async function startApp() {
 			window.history.replaceState({}, "", window.location.pathname);
 
 			events.emit("pageLoaded");
-		} //else {
-		//showLoginScreen();
-		//}
+		} else {
+			showLoginScreen();
+		}
 	}
 
 	appReady = true;
